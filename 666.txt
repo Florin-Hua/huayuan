@@ -6,4 +6,4 @@ public class Sum {
         }
         System.out.println("总和：" + sum);
     }
-}aszxdcfgvhbjn
+}aszxdcfgvhbjn666
