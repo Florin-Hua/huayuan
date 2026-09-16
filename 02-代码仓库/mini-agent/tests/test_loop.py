@@ -9,7 +9,8 @@ import pytest
 
 from mini_agent.core.loop import AgentCore
 from mini_agent.core.types import Message, ModelResponse, RunStatus, ToolCall, Usage
-from mini_agent.tools.builtin import calculator, execute_tool
+from mini_agent.tools.builtin import calculator
+from mini_agent.tools.registry import execute_tool
 
 
 class ScriptedAdapter:

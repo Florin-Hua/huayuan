@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     max_iterations: int = 10
     sandbox_dir: str = "data"
 
+    # Tools
+    tool_timeout_seconds: float = 30.0
+
 
 def load_settings() -> Settings:
     """加载配置（当前工作目录下的 .env 优先）。"""

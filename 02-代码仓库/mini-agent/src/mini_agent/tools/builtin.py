@@ -1,16 +1,17 @@
-"""阶段1 内置工具：calculator 与 read_text_file。
-
-这里刻意不用 eval/exec，文件读取也被限制在沙箱内，先建立最小安全边界。
-"""
+"""MiniAgent 内置工具：calculator、文件读写、mock_web_search。"""
 from __future__ import annotations
 
 import ast
 import operator
-import time
 from pathlib import Path
 from typing import Any
 
-from mini_agent.core.types import ToolCall, ToolResult
+from pydantic import BaseModel, Field
+
+from mini_agent.tools.registry import ToolDefinition, tool
+
+_MAX_TEXT_CHARS = 8000
+_MAX_POWER = 1000
 
 _BIN_OPS: dict[type[ast.operator], Any] = {
     ast.Add: operator.add,
@@ -27,15 +28,29 @@ _UNARY_OPS: dict[type[ast.unaryop], Any] = {
     ast.UAdd: operator.pos,
 }
 
-_MAX_TEXT_CHARS = 8000
-_MAX_POWER = 1000
+
+class CalculatorInput(BaseModel):
+    expression: str = Field(description="要计算的数字表达式，例如 23*47+11")
 
 
+class ReadTextFileInput(BaseModel):
+    path: str = Field(description="沙箱内文件路径，例如 notes.txt")
+
+
+class WriteTextFileInput(BaseModel):
+    path: str = Field(description="沙箱内目标文件路径")
+    content: str = Field(description="要写入的 UTF-8 文本内容")
+
+
+class MockWebSearchInput(BaseModel):
+    query: str = Field(description="搜索关键词")
+
+
+@tool(CalculatorInput)
 def calculator(expression: str) -> int | float:
-    """用 AST 白名单安全计算整数/浮点表达式，不执行任意代码。"""
-    if not isinstance(expression, str) or not expression.strip():
+    """安全计算一个数字表达式，支持 + - * / // % ** 和一元正负号。"""
+    if not expression.strip():
         raise ValueError("expression must be a non-empty string")
-
     try:
         tree = ast.parse(expression, mode="eval")
     except SyntaxError as exc:
@@ -91,90 +106,71 @@ def _evaluate_node(node: ast.AST) -> int | float:
     raise ValueError(f"disallowed AST node: {type(node).__name__}")
 
 
-def read_text_file(path: str, sandbox: Path) -> dict[str, Any]:
-    """读取沙箱内文本文件；路径逃逸、不存在、编码错误都会返回异常。"""
+def _resolve_sandbox_path(path: str, sandbox: Path) -> Path:
     requested = Path(path)
     target = requested if requested.is_absolute() else sandbox / requested
     target = target.resolve()
     sandbox_resolved = sandbox.resolve()
-
     if not target.is_relative_to(sandbox_resolved):
         raise ValueError(f"path escapes sandbox: {requested}")
+    return target
 
+
+@tool(ReadTextFileInput)
+def read_text_file(path: str, sandbox: Path) -> dict[str, Any]:
+    """读取沙箱内一个 UTF-8 文本文件，超过 8000 字符自动截断。"""
+    target = _resolve_sandbox_path(path, sandbox)
     if not target.is_file():
-        raise FileNotFoundError(f"file not found: {requested}")
+        raise FileNotFoundError(f"file not found: {path}")
 
     content = target.read_text(encoding="utf-8")
     truncated = len(content) > _MAX_TEXT_CHARS
     return {
-        "path": str(requested),
+        "path": path,
         "content": content[:_MAX_TEXT_CHARS],
         "truncated": truncated,
     }
 
 
-TOOL_SCHEMAS: list[dict[str, Any]] = [
-    {
-        "type": "function",
-        "function": {
-            "name": "calculator",
-            "description": "安全计算一个数字表达式，支持 + - * / // % ** 和一元正负号。",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "expression": {
-                        "type": "string",
-                        "description": "要计算的表达式，例如 23*47+11",
-                    }
-                },
-                "required": ["expression"],
+@tool(WriteTextFileInput)
+def write_text_file(path: str, content: str, sandbox: Path) -> dict[str, Any]:
+    """把 UTF-8 文本写入沙箱内文件，用于保存任务结果。"""
+    target = _resolve_sandbox_path(path, sandbox)
+    existed = target.exists()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(content, encoding="utf-8")
+    return {
+        "path": path,
+        "bytes_written": len(content.encode("utf-8")),
+        "overwritten": existed,
+    }
+
+
+@tool(MockWebSearchInput)
+def mock_web_search(query: str) -> dict[str, Any]:
+    """返回固定 fixture 的模拟搜索结果，不访问网络。"""
+    return {
+        "query": query,
+        "results": [
+            {
+                "title": "MiniAgent mock result 1",
+                "url": "https://example.com/mock-1",
+                "snippet": f"Mock search snippet about {query}.",
             },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "read_text_file",
-            "description": "读取沙箱内一个 UTF-8 文本文件；path 是相对沙箱的路径。",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "文件路径，例如 notes.txt 或 data/notes.txt",
-                    }
-                },
-                "required": ["path"],
+            {
+                "title": "MiniAgent mock result 2",
+                "url": "https://example.com/mock-2",
+                "snippet": "This result is deterministic and safe for tests.",
             },
-        },
-    },
+        ],
+    }
+
+
+BUILTIN_TOOLS: list[ToolDefinition] = [
+    calculator,
+    read_text_file,
+    write_text_file,
+    mock_web_search,
 ]
 
-
-def execute_tool(call: ToolCall, sandbox: Path) -> ToolResult:
-    """统一工具入口：未知工具和执行错误都变成结构化结果回喂模型。"""
-    started = time.perf_counter()
-    ok = False
-    data: Any = None
-    error: str | None = None
-
-    try:
-        if call.name == "calculator":
-            data = calculator(**call.arguments)
-            ok = True
-        elif call.name == "read_text_file":
-            data = read_text_file(**call.arguments, sandbox=sandbox)
-            ok = True
-        else:
-            error = f"unknown tool: {call.name}"
-    except Exception as exc:
-        error = f"{type(exc).__name__}: {exc}"
-
-    duration_ms = round((time.perf_counter() - started) * 1000)
-    return ToolResult(
-        call=call,
-        ok=ok,
-        data=data,
-        error=error,
-        duration_ms=duration_ms,
-    )
+TOOL_SCHEMAS = [definition.schema for definition in BUILTIN_TOOLS]
