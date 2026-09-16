@@ -2,6 +2,7 @@
 
 > 项目：自研 Mini Agent 框架（大四实习个人 Agent 项目）
 > 本目录 = 项目唯一主目录 & git 仓库根目录（main 分支）
+> 远程仓库：https://github.com/Florin-Hua/huayuan
 > 目标：不依赖任何重型框架，从 0 实现 ReAct 循环、工具系统、多模型适配、上下文压缩、记忆与评测闭环
 
 ## 目录结构（按序号排序）
@@ -45,3 +46,4 @@
 
 - 02-代码仓库/mini-agent 内含一套既有实现（agent / api / llm / memory / rag / tools / web 等），后续阶段开发前需先与九阶段计划对齐
 - .env、data/、__pycache__、*.db、*.sqlite3 已被 .gitignore 忽略，严禁提交密钥与运行数据
+
