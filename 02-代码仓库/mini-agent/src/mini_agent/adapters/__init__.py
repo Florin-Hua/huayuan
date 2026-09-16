@@ -1,0 +1,1 @@
+"""adapters：模型适配层（阶段3扩展为多 provider）。"""
