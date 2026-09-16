@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  # ===== 主应用 =====
+  agent:
+    build: .
+    container_name: mini-agent
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./.env:/app/.env:ro
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-3-small}
+      - VECTOR_DB_PATH=/app/data/vector_db
+      - DB_PATH=/app/data/sqlite/agent.db
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  # ===== Redis 缓存/会话 =====
+  redis:
+    image: redis:7-alpine
+    container_name: mini-agent-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+volumes:
+  redis_data:
