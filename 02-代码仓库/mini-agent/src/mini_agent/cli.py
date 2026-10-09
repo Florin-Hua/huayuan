@@ -1,4 +1,4 @@
-"""MiniAgent 命令行入口：mini run / mini memory。"""
+"""MiniAgent 命令行入口：mini run / mini memory / mini trace。"""
 from __future__ import annotations
 
 import argparse
@@ -10,6 +10,7 @@ from rich.table import Table
 from mini_agent.config import Settings, load_settings
 from mini_agent.core.types import AgentRun, RunStatus
 from mini_agent.memory import MemoryStore
+from mini_agent.trace import TraceStore
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -33,6 +34,9 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="工具沙箱目录，默认读取 SANDBOX_DIR",
     )
+
+    trace = sub.add_parser("trace", help="查看一次运行的执行轨迹")
+    trace.add_argument("run_id", help="run ID")
 
     memory = sub.add_parser("memory", help="管理长期记忆")
     memory_sub = memory.add_subparsers(dest="memory_command", required=True)
@@ -70,6 +74,57 @@ def _print_run(console: Console, result: AgentRun) -> None:
         console.print(f"新增长期记忆：{len(result.memories_saved)} 条")
     if result.answer:
         console.print(f"最终输出：{result.answer}")
+
+
+def _print_trace(console: Console, run: dict, steps: list[dict]) -> None:
+    table = Table(title=f"MiniAgent trace {run['run_id']}")
+    table.add_column("Step", justify="right")
+    table.add_column("Iter", justify="right")
+    table.add_column("State")
+    table.add_column("Tool")
+    table.add_column("Args")
+    table.add_column("Result")
+    table.add_column("Tokens", justify="right")
+    table.add_column("ms", justify="right")
+    table.add_column("Detail")
+    for step in steps:
+        detail = step["error"] or step["note"] or ""
+        table.add_row(
+            str(step["step"]),
+            str(step["iteration"]),
+            step["state"],
+            step["tool_name"] or "-",
+            step["tool_args"] or "-",
+            step["result_status"] or "-",
+            str(step["tokens"]),
+            str(step["duration_ms"]),
+            detail,
+        )
+    console.print(table)
+    console.print(
+        f"任务：{run['task']}"
+        f"状态：[bold]{run['status']}[/bold]；"
+        f"迭代：{run['iterations']}；tokens：{run['total_tokens']}；"
+        f"解析重试：{run['parse_retries']}"
+    )
+    if run["termination_reason"]:
+        console.print(f"终止原因：{run['termination_reason']}")
+    if run["answer"]:
+        console.print(f"最终输出：{run['answer']}")
+
+
+def _handle_trace(args: argparse.Namespace, console: Console, settings: Settings) -> int:
+    if not settings.trace_enabled:
+        console.print("[red]TRACE_ENABLED=false，Trace 系统未启用。[/red]")
+        return 1
+
+    with TraceStore(settings.trace_db_path) as store:
+        run = store.get_run(args.run_id)
+        if run is None:
+            console.print(f"[red]未找到 run_id：{args.run_id}[/red]")
+            return 1
+        _print_trace(console, run, store.get_steps(args.run_id))
+    return 0
 
 
 def _print_memories(console: Console, records, distances=None) -> None:
@@ -139,6 +194,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "memory":
         return _handle_memory(args, console, settings)
+
+    if args.command == "trace":
+        return _handle_trace(args, console, settings)
 
     if args.provider:
         settings.model_provider = args.provider

@@ -13,7 +13,7 @@ from mini_agent.adapters.factory import create_adapter
 from mini_agent.adapters.openai import OpenAIAdapter
 from mini_agent.config import Settings
 from mini_agent.core.loop import AgentCore
-from mini_agent.core.types import Message, RunStatus, ToolCall
+from mini_agent.core.types import ModelResponseError, Message, RunStatus, ToolCall
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -109,7 +109,7 @@ def test_openai_recorded_response_to_model_response() -> None:
     assert result.usage.completion_tokens == 35
 
 
-def test_openai_invalid_tool_arguments_are_normalized() -> None:
+def test_openai_invalid_tool_arguments_raise_model_response_error() -> None:
     raw = object_from_json(
         {
             "id": "call_bad",
@@ -119,10 +119,8 @@ def test_openai_invalid_tool_arguments_are_normalized() -> None:
             }
         }
     )
-    call = OpenAIAdapter._to_tool_call(raw)
-    assert call.id == "call_bad"
-    assert call.name == "calculator"
-    assert call.arguments == {"_raw": "{invalid json"}
+    with pytest.raises(ModelResponseError, match="not a JSON object"):
+        OpenAIAdapter._to_tool_call(raw)
 
 
 def test_anthropic_internal_to_provider_messages() -> None:

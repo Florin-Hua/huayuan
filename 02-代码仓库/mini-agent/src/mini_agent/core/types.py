@@ -1,7 +1,4 @@
-"""核心数据结构（第0阶段设计的阶段1精简落地）。
-
-所有模块只通过这里定义的数据结构通信（依赖规则见 01-阶段进程/第0阶段-总体设计.md）。
-"""
+"""核心数据结构：MiniAgent 各模块之间唯一的通信契约。"""
 from __future__ import annotations
 
 from datetime import datetime
@@ -11,6 +8,14 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 Role = Literal["system", "user", "assistant", "tool"]
+
+
+class ModelResponseError(ValueError):
+    """模型输出无法转换成合法 ModelResponse，可回喂错误后重试。"""
+
+    def __init__(self, detail: str) -> None:
+        super().__init__(detail)
+        self.detail = detail
 
 
 class ToolCall(BaseModel):
@@ -81,24 +86,28 @@ class CompressionStats(BaseModel):
 
 
 class RunStatus(str, Enum):
-    """运行终态：阶段1支持三种，其余终态在阶段6补全。"""
+    """运行终态：success、护栏终止与解析失败。"""
 
     SUCCESS = "success"
     MAX_ITER = "max_iterations"
     PARSE_ERROR = "parse_error"
     CONTEXT_LIMIT = "context_limit"
+    TOKEN_BUDGET = "token_budget"
+    OSCILLATION = "oscillation"
 
 
 class StepLog(BaseModel):
-    """一步执行的日志（阶段6将升级为 Tracer 落库）。"""
+    """一步执行的内存日志；TraceStore 会把它落库。"""
 
     iteration: int
-    state: Literal["THINK", "ACT", "OBSERVE", "COMPRESS", "END"]
+    state: Literal["THINK", "RETRY", "ACT", "OBSERVE", "COMPRESS", "GUARD", "END"]
     tool_name: str | None = None
     tool_args: dict[str, Any] | None = None
     ok: bool | None = None
     error: str | None = None
     note: str | None = None
+    duration_ms: int = 0
+    tokens: int = 0
 
 
 class AgentRun(BaseModel):
@@ -118,3 +127,4 @@ class AgentRun(BaseModel):
     termination_reason: str | None = None
     started_at: datetime = Field(default_factory=datetime.now)
     finished_at: datetime | None = None
+    parse_retries: int = 0

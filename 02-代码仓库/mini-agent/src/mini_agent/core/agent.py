@@ -17,6 +17,7 @@ from mini_agent.memory import (
 )
 from mini_agent.tools.builtin import BUILTIN_TOOLS
 from mini_agent.tools.registry import ToolDefinition, ToolRegistry
+from mini_agent.trace import TraceStore
 
 
 class Agent:
@@ -40,6 +41,11 @@ class Agent:
                 dimension=self.settings.memory_dimension,
             )
             if self.settings.memory_enabled
+            else None
+        )
+        self.trace_store = (
+            TraceStore(self.settings.trace_db_path)
+            if self.settings.trace_enabled
             else None
         )
         self.model = model or self.settings.resolved_model
@@ -80,6 +86,9 @@ class Agent:
                 tool_output_head_chars=self.settings.context_tool_output_head_chars,
                 tool_output_tail_chars=self.settings.context_tool_output_tail_chars,
             ),
+            token_budget=self.settings.token_budget,
+            parse_retry_limit=self.settings.parse_retry_limit,
+            tracer=self.trace_store,
         )
 
     def run(self, task: str) -> AgentRun:
@@ -103,12 +112,16 @@ class Agent:
             except Exception:
                 # 记忆抽取失败不影响主任务结果；阶段6 Trace 再记录失败原因。
                 result.memories_saved = []
+        if self.trace_store is not None:
+            self.trace_store.save_run(result)
         return result
 
     def close(self) -> None:
         """释放数据库连接。"""
         if self.memory_store is not None:
             self.memory_store.close()
+        if self.trace_store is not None:
+            self.trace_store.close()
 
     def __enter__(self) -> "Agent":
         return self

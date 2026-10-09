@@ -54,6 +54,12 @@ class Settings(BaseSettings):
     memory_top_k: int = 3
     memory_dimension: int = 256
 
+    # Robustness & Trace (Stage 6)
+    token_budget: int = 100_000
+    parse_retry_limit: int = 2
+    trace_enabled: bool = True
+    trace_db_path: str = "data/trace.sqlite3"
+
     @field_validator("model_provider", mode="before")
     @classmethod
     def normalize_provider(cls, value: str) -> str:

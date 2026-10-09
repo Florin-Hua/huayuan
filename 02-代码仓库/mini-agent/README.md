@@ -1,6 +1,6 @@
 # MiniAgent
 
-从零自研的 mini agent 框架。当前进度：阶段5（记忆系统）。
+从零自研的 mini agent 框架。当前进度：阶段6（健壮性与Trace）。
 
 ## 快速开始
 
@@ -53,7 +53,7 @@ CLI 可以临时覆盖 provider：
 .venv\Scripts\python.exe -m pytest
 ```
 
-当前结果：`44 passed`。测试使用 fake client、录制 fixture 与 scripted adapter，不访问网络、不消耗 API key。
+当前结果：`54 passed`。测试使用 fake client、录制 fixture、scripted adapter 与失败注入，不访问网络、不消耗 API key。
 
 ## 上下文压缩
 
@@ -91,6 +91,30 @@ mini memory delete 1
 
 默认向量器是离线 HashingEmbedder，适合测试与无网络环境；后续可通过 Embedder 协议替换为语义 embedding。
 
+## 健壮性与 Trace
+
+AgentCore 内置三层护栏：
+
+- 最大迭代次数：默认 10；
+- 单 run token 预算：默认 100,000，超限返回 `token_budget`；
+- 震荡检测：连续两轮完全相同的工具与参数，返回 `oscillation`。
+
+模型输出解析失败时会回喂错误并重试，默认最多 2 次；工具异常和超时仍结构化回喂模型，不直接崩溃。
+
+```env
+MAX_ITERATIONS=10
+TOKEN_BUDGET=100000
+PARSE_RETRY_LIMIT=2
+TRACE_ENABLED=true
+TRACE_DB_PATH=data/trace.sqlite3
+```
+
+Trace 保存 run 汇总与每一步状态、工具名、参数、结果、token 与耗时：
+
+```powershell
+mini trace <run_id>
+```
+
 ## 自定义工具
 
 ```python
@@ -127,6 +151,15 @@ print(result.answer)
 - CLI `--provider openai/anthropic`
 - AgentCore / ReAct / ToolRegistry 不感知供应商格式
 
+### 阶段6 · 健壮性与Trace
+
+- `ModelResponseError`：非法 JSON / 空 tool call 被归类为可自愈解析错误
+- 解析失败错误回喂重试，默认最多 2 次；仍失败则优雅终止
+- Guard：最大迭代、100k token 预算、连续相同工具调用震荡检测
+- `TraceStore`：SQLite 保存 run 汇总与逐步 trace
+- CLI：`mini trace <run_id>`，rich 表格展示
+- 失败注入测试：非法输出、工具异常、工具超时、震荡调用、token 超限
+
 ### 阶段5 · 记忆系统
 
 - `MemoryStore`：SQLite + sqlite-vec，保存内容、embedding、来源 run_id、创建时间
@@ -145,6 +178,6 @@ print(result.answer)
 
 ## 当前验收说明
 
-单元测试 44/44 通过。真实 OpenAI 调用当前因 `api.openai.com` 网络超时被阻断；Anthropic 网络可达但缺少有效 `ANTHROPIC_API_KEY`。待网络或密钥配置后按根仓库 `01-阶段进程/第3阶段-多模型适配.md` 与 `第5阶段-记忆系统.md` 中的命令重试。
+单元测试 54/54 通过。真实 OpenAI 调用当前因 `api.openai.com` 网络超时被阻断；Anthropic 网络可达但缺少有效 `ANTHROPIC_API_KEY`。待网络或密钥配置后按根仓库 `01-阶段进程/第3阶段-多模型适配.md` 与 `第5阶段-记忆系统.md` 中的命令重试。
 
 完整设计见仓库根 `01-阶段进程/` 各阶段文档。

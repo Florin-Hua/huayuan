@@ -151,7 +151,7 @@ def test_long_task_completes_with_context_compression(tmp_path: Path) -> None:
     registry.register(long_echo)
     text = "A" * 6000
     adapter = ScriptedAdapter(
-        [tool_response(index, text) for index in range(1, 13)]
+        [tool_response(index, f"{index}:{text}") for index in range(1, 13)]
         + [final_answer("长任务已完成，早期上下文已压缩。")]
     )
     manager = ContextManager(

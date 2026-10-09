@@ -7,7 +7,13 @@ from typing import Any
 from anthropic import Anthropic
 
 from mini_agent.config import Settings
-from mini_agent.core.types import Message, ModelResponse, ToolCall, Usage
+from mini_agent.core.types import (
+    Message,
+    ModelResponse,
+    ModelResponseError,
+    ToolCall,
+    Usage,
+)
 
 
 class AnthropicAdapter:
@@ -152,7 +158,9 @@ class AnthropicAdapter:
             elif block_type == "tool_use":
                 arguments = getattr(block, "input", {})
                 if not isinstance(arguments, dict):
-                    arguments = {"_raw": arguments}
+                    raise ModelResponseError(
+                        f"tool {getattr(block, 'name', '<unknown>')} input is not an object"
+                    )
                 tool_calls.append(
                     ToolCall(
                         id=getattr(block, "id", ""),

@@ -1,7 +1,7 @@
 [project]
 name = "mini-agent"
-version = "0.5.0"
-description = "MiniAgent: 从零自研的 mini agent 框架（阶段5：记忆系统）"
+version = "0.6.0"
+description = "MiniAgent: 从零自研的 mini agent 框架（阶段6：健壮性与Trace）"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

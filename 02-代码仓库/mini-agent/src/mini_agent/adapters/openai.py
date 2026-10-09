@@ -7,7 +7,13 @@ from typing import Any
 from openai import OpenAI
 
 from mini_agent.config import Settings
-from mini_agent.core.types import Message, ModelResponse, ToolCall, Usage
+from mini_agent.core.types import (
+    Message,
+    ModelResponse,
+    ModelResponseError,
+    ToolCall,
+    Usage,
+)
 
 
 class OpenAIAdapter:
@@ -39,7 +45,7 @@ class OpenAIAdapter:
     def to_model_response(response: Any) -> ModelResponse:
         """OpenAI response -> MiniAgent 统一 ModelResponse。"""
         if not response.choices:
-            raise ValueError("model response has no choices")
+            raise ModelResponseError("model response has no choices")
         choice = response.choices[0]
         message = choice.message
         tool_calls = [OpenAIAdapter._to_tool_call(call) for call in message.tool_calls or []]
@@ -87,6 +93,8 @@ class OpenAIAdapter:
             if not isinstance(parsed, dict):
                 raise ValueError("tool arguments must be a JSON object")
             arguments = parsed
-        except (TypeError, ValueError, json.JSONDecodeError):
-            arguments = {"_raw": function.arguments}
+        except (TypeError, ValueError, json.JSONDecodeError) as exc:
+            raise ModelResponseError(
+                f"tool {function.name} arguments is not a JSON object: {exc}"
+            ) from exc
         return ToolCall(id=raw.id, name=function.name, arguments=arguments)
