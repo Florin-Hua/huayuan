@@ -1,11 +1,11 @@
 # MiniAgent
 
-> MiniAgent 0.8.0：从零自研的 mini agent 框架。当前完成第0-8阶段，包含 ReAct 循环、工具系统、多模型适配、上下文压缩、记忆、健壮性与 Trace、MCP 兼容和 scripted 框架评测。
+> MiniAgent 0.9.0：从零自研的 mini agent 框架。当前完成第0-9阶段，包含 ReAct 循环、工具系统、多模型适配、上下文压缩、记忆、健壮性与 Trace、MCP 兼容、scripted 框架评测和本地可视化控制台。
 
 ## 架构
 
 ```text
-CLI / Python API
+CLI / Web UI / Python API
       │
    Agent 门面
       │
@@ -33,6 +33,31 @@ mini run "读取 data/notes.txt，统计行数，把结果写入 data/result.txt
 ```powershell
 .venv\Scripts\python.exe -m mini_agent.cli run "读取 notes.txt 并告诉我内容" --sandbox data
 ```
+
+## 可视化界面
+
+启动本地 Web UI：
+
+```powershell
+.venv\Scripts\python.exe -m mini_agent.webapp
+# 或安装后使用：mini-web
+```
+
+浏览器访问：
+
+```text
+http://127.0.0.1:8765
+```
+
+界面支持：
+
+- 任务输入、provider / model / 最大迭代覆盖、内置 MCP 开关；
+- 最终答案、状态、迭代数、token、压缩次数指标卡；
+- ReAct 执行轨迹表（THINK / ACT / OBSERVE / COMPRESS / RETRY / GUARD / END）；
+- 长期记忆列表、搜索与删除；
+- 历史 run 列表，点击回看 Trace。
+
+安全边界：默认只绑定 `127.0.0.1`；API key 保留在本地 `.env`，`/api/config` 不返回密钥；UI 不接受任意 MCP 命令，只能选择内置 MCP server；请求体限制 64KB，静态文件仅开放白名单后缀。不要把该服务直接暴露到公网。
 
 ## 多模型配置
 
@@ -70,7 +95,7 @@ CLI 可以临时覆盖 provider：
 .venv\Scripts\python.exe -m pytest
 ```
 
-当前结果：`64 passed in 15.37s`。测试使用 fake client、录制 fixture、scripted adapter、失败注入与真实 stdio MCP 子进程；除 MCP 子进程外不访问网络、不消耗 API key。
+当前结果：`69 passed in 15.85s`。测试使用 fake client、录制 fixture、scripted adapter、失败注入与真实 stdio MCP 子进程；除 MCP 子进程外不访问网络、不消耗 API key。
 
 ## 评测
 
@@ -263,15 +288,25 @@ print(result.answer)
 - 8 组 scripted 消融实验：strong/baseline × 压缩 ON/OFF × 记忆 ON/OFF
 - 逐任务 records、分类指标、失败恢复率
 - GAIA gated 状态与授权后本地抽样脚本
-- 5 个新增评测测试，全量 64/64 通过
+- 5 个新增评测测试，阶段8全量 64/64 通过
+
+### 阶段9 · 可视化界面
+
+- `mini-web` / `python -m mini_agent.webapp` 本地控制台
+- Python 标准库 `ThreadingHTTPServer` API 层，零新增后端依赖
+- 原生 HTML / CSS / JavaScript 前端，零 npm 构建
+- 任务运行、指标卡、ReAct 轨迹表、长期记忆管理与历史 Trace 回看
+- 5 个新增 Web UI 测试，全量 69/69 通过
 
 ## 代码规模与验收
 
-| 范围 | 文件数 | 行数 |
+| 范围 | 文件数 | 非空行 |
 |---|---:|---:|
-| `src/mini_agent/` | 19 | 2369 |
-| `tests/` | 8 | 1262 |
+| `src/mini_agent/`（含 Web UI） | 23 | 3199 |
+| `tests/` | 9 | 1343 |
 | `eval/` | 2 | 295 |
+
+> 行数统计沿用阶段8的非空行口径；若按物理行统计，`src/mini_agent/` 为 3689 行，`tests/` 为 1665 行。
 
 验收命令：
 
@@ -289,6 +324,7 @@ print(result.answer)
 4. 默认 HashingEmbedder 语义能力有限，记忆泛化样本量小；
 5. 无 checkpoint 恢复、流式输出与并发调度；
 6. MCP 仅实现 stdio `tools/list` / `tools/call`；
-7. Python 线程池超时无法强制终止底层调用。
+7. Python 线程池超时无法强制终止底层调用；
+8. Web UI 面向本机使用，没有登录鉴权，不适合直接暴露公网。
 
 完整设计见仓库根 `01-阶段进程/`，交付报告见 `03-交付物/`。

@@ -1,7 +1,7 @@
 [project]
 name = "mini-agent"
-version = "0.8.0"
-description = "MiniAgent: 从零自研的 mini agent 框架（阶段8：评测与交付）"
+version = "0.9.0"
+description = "MiniAgent: 从零自研的 mini agent 框架（阶段9：本地可视化界面）"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -23,6 +23,10 @@ dev = [
 [project.scripts]
 mini = "mini_agent.cli:main"
 mini-mcp-server = "mini_agent.mcp_server:main"
+mini-web = "mini_agent.webapp:main"
+
+[tool.setuptools.package-data]
+mini_agent = ["web/*"]
 
 [build-system]
 requires = ["setuptools>=68"]

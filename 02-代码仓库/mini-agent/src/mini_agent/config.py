@@ -67,7 +67,11 @@ class Settings(BaseSettings):
     @field_validator("model_provider", mode="before")
     @classmethod
     def normalize_provider(cls, value: str) -> str:
-        return value.strip().lower()
+        normalized = value.strip().lower()
+        # 千问 / DeepSeek / GLM / Ollama 等均可走 OpenAI 兼容接口。
+        if normalized in {"qwen", "千问", "deepseek", "moonshot", "glm", "ollama"}:
+            return "openai"
+        return normalized
 
     @property
     def resolved_model(self) -> str:

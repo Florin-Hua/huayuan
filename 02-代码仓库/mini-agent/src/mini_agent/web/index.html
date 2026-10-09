@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MiniAgent 可视化控制台</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>MiniAgent 控制台</h1>
+      <p id="subtitle">本地可视化 ReAct Agent · 工具调用 · Trace · 长期记忆</p>
+    </div>
+    <div class="header-status">
+      <span id="provider-badge">provider</span>
+      <span id="model-badge">model</span>
+      <span id="memory-badge">memory</span>
+      <span id="trace-badge">trace</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel run-panel">
+      <h2>任务运行</h2>
+      <label for="task-input">任务描述</label>
+      <textarea id="task-input" rows="6" placeholder="例如：读取 notes.txt，总结内容，并把总结写入 summary.txt"></textarea>
+      <div class="quick-actions">
+        <button type="button" data-example="读取 notes.txt，总结内容，并写入 summary.txt">文件总结</button>
+        <button type="button" data-example="计算 19 + 23，再乘以 7">计算</button>
+        <button type="button" data-example="请记住：我的项目总结必须使用中文，并且保持简短">写入记忆</button>
+        <button type="button" data-example="用 MCP 计算 19 + 23">MCP 示例</button>
+      </div>
+
+      <div class="options">
+        <label>Provider
+          <select id="provider-select">
+            <option value="">使用 .env 配置</option>
+            <option value="openai">openai</option>
+            <option value="anthropic">anthropic</option>
+          </select>
+        </label>
+        <label>模型
+          <input id="model-input" type="text" placeholder="留空使用 .env" />
+        </label>
+        <label>最大迭代
+          <input id="iterations-input" type="number" min="1" max="20" placeholder="10" />
+        </label>
+        <label class="checkbox">
+          <input id="mcp-input" type="checkbox" />
+          启用内置 MCP
+        </label>
+      </div>
+
+      <button id="run-button" class="primary">运行任务</button>
+      <div id="run-error" class="error hidden"></div>
+
+      <div id="metrics" class="metrics"></div>
+      <article id="conversation" class="conversation empty">
+        <p class="placeholder">任务结果会显示在这里。</p>
+      </article>
+    </section>
+
+    <section class="panel trace-panel">
+      <h2>执行轨迹</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>轮次</th><th>状态</th><th>工具</th>
+              <th>参数</th><th>结果</th><th>耗时</th><th>Tokens</th><th>说明</th>
+            </tr>
+          </thead>
+          <tbody id="trace-body">
+            <tr><td colspan="9" class="empty-cell">暂无轨迹</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel memory-panel">
+      <h2>长期记忆</h2>
+      <div class="memory-search">
+        <input id="memory-query" type="text" placeholder="搜索记忆" />
+        <button id="memory-search-button">搜索</button>
+        <button id="memory-refresh-button">刷新</button>
+      </div>
+      <ul id="memory-list"><li class="empty-cell">暂无记忆</li></ul>
+    </section>
+
+    <section class="panel history-panel">
+      <h2>历史运行</h2>
+      <ul id="history-list"><li class="empty-cell">暂无历史</li></ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>仅绑定 127.0.0.1；API key 保留在本地 .env，界面不会显示或返回密钥。</p>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
