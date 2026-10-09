@@ -70,19 +70,30 @@ class ToolResult(BaseModel):
     duration_ms: int = 0
 
 
+class CompressionStats(BaseModel):
+    """一次上下文压缩的统计结果。"""
+
+    before_tokens: int
+    after_tokens: int
+    summarized_rounds: int
+    summarized_messages: int
+    enabled: bool = True
+
+
 class RunStatus(str, Enum):
     """运行终态：阶段1支持三种，其余终态在阶段6补全。"""
 
     SUCCESS = "success"
     MAX_ITER = "max_iterations"
     PARSE_ERROR = "parse_error"
+    CONTEXT_LIMIT = "context_limit"
 
 
 class StepLog(BaseModel):
     """一步执行的日志（阶段6将升级为 Tracer 落库）。"""
 
     iteration: int
-    state: Literal["THINK", "ACT", "OBSERVE", "END"]
+    state: Literal["THINK", "ACT", "OBSERVE", "COMPRESS", "END"]
     tool_name: str | None = None
     tool_args: dict[str, Any] | None = None
     ok: bool | None = None
@@ -101,6 +112,7 @@ class AgentRun(BaseModel):
     )
     iterations: int = 0
     steps: list[StepLog] = Field(default_factory=list)
+    compressions: list[CompressionStats] = Field(default_factory=list)
     usage: Usage = Field(default_factory=Usage)
     termination_reason: str | None = None
     started_at: datetime = Field(default_factory=datetime.now)

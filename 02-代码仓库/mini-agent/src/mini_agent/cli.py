@@ -53,6 +53,8 @@ def _print_run(console: Console, result: AgentRun) -> None:
     console.print(table)
     console.print(f"状态：[bold]{result.status.value}[/bold]")
     console.print(f"迭代次数：{result.iterations}；tokens：{result.usage.total}")
+    if result.compressions:
+        console.print(f"上下文压缩：{len(result.compressions)} 次")
     if result.answer:
         console.print(f"最终输出：{result.answer}")
 

@@ -1,4 +1,4 @@
-"""AgentCore：手写 ReAct 循环（阶段2 起通过 ToolRegistry 调度工具）。"""
+"""AgentCore：手写 ReAct 循环（阶段2工具调度、阶段3模型适配、阶段4上下文压缩）。"""
 from __future__ import annotations
 
 import json
@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 from typing import Protocol
 
+from mini_agent.core.context import ContextBudgetExceeded, ContextManager
 from mini_agent.core.types import (
     AgentRun,
     Message,
@@ -42,12 +43,16 @@ class AgentCore:
         adapter: ChatAdapter,
         max_iterations: int,
         registry: ToolRegistry | None = None,
+        context_manager: ContextManager | None = None,
     ) -> None:
         if max_iterations < 1:
             raise ValueError("max_iterations must be >= 1")
         self.adapter = adapter
         self.max_iterations = max_iterations
         self.registry = registry or default_registry()
+        self.context_manager = context_manager or ContextManager(
+            summarizer=self._summarize_history
+        )
 
     def run(self, task: str, sandbox) -> AgentRun:
         """运行任务并返回完整轨迹（不抛业务异常）。"""
@@ -57,18 +62,56 @@ class AgentCore:
             status=RunStatus.MAX_ITER,
             iterations=0,
         )
-        messages: list[Message] = [
+        history: list[Message] = [
             Message(role="system", content=self.SYSTEM_PROMPT),
             Message(role="user", content=task),
         ]
 
         for iteration in range(1, self.max_iterations + 1):
             run.iterations = iteration
+
+            try:
+                prepared = self.context_manager.prepare(history)
+            except ContextBudgetExceeded as exc:
+                reason = f"上下文预算终止：{exc}"
+                run.steps.append(
+                    StepLog(
+                        iteration=iteration,
+                        state="END",
+                        error=reason,
+                        note="上下文超过预算",
+                    )
+                )
+                self._finish(
+                    run,
+                    RunStatus.CONTEXT_LIMIT,
+                    "上下文超过预算，任务未能继续。",
+                    reason,
+                )
+                return run
+
+            if prepared.compression is not None:
+                stats = prepared.compression
+                run.compressions.append(stats)
+                run.steps.append(
+                    StepLog(
+                        iteration=iteration,
+                        state="COMPRESS",
+                        note=(
+                            f"上下文压缩：{stats.before_tokens} -> "
+                            f"{stats.after_tokens} tokens；"
+                            f"摘要 {stats.summarized_rounds} 轮"
+                        ),
+                    )
+                )
+
             run.steps.append(StepLog(iteration=iteration, state="THINK", note="调用模型"))
 
             # THINK：模型决定最终回答还是发起工具调用
             try:
-                response = self.adapter.chat(messages, self.registry.schemas)
+                response = self.adapter.chat(
+                    prepared.messages, self.registry.schemas
+                )
             except Exception as exc:
                 reason = f"模型调用失败：{type(exc).__name__}: {exc}"
                 run.steps.append(
@@ -80,7 +123,7 @@ class AgentCore:
                 return run
 
             run.usage.add(response.usage)
-            messages.append(
+            history.append(
                 Message(
                     role="assistant",
                     content=response.content,
@@ -115,15 +158,20 @@ class AgentCore:
                     )
                 )
 
-                # OBSERVE：把成功数据和失败错误都回喂模型
-                messages.append(
+                # OBSERVE：把成功数据和失败错误都回喂模型，并先做输出截断
+                data, data_truncated = self.context_manager.truncate_payload(
+                    result.data
+                )
+                error, _ = self.context_manager.truncate_payload(result.error)
+                history.append(
                     Message(
                         role="tool",
                         content=json.dumps(
                             {
                                 "ok": result.ok,
-                                "data": result.data,
-                                "error": result.error,
+                                "data": data,
+                                "error": error,
+                                "truncated": data_truncated,
                             },
                             ensure_ascii=False,
                         ),
@@ -163,6 +211,24 @@ class AgentCore:
             return run
 
         return run
+
+    def _summarize_history(self, messages: list[Message]) -> str:
+        """用当前模型适配器生成滚动摘要；摘要调用不计入主任务 usage。"""
+        transcript = "\n".join(
+            f"{message.role}: {message.content or ''}" for message in messages
+        )
+        prompt = [
+            Message(
+                role="system",
+                content=(
+                    "你是上下文压缩器。请把早期 ReAct 历史压缩成不超过 300 字的摘要，"
+                    "保留任务目标、已尝试工具、关键结果、错误与仍未完成事项。"
+                ),
+            ),
+            Message(role="user", content=transcript),
+        ]
+        response = self.adapter.chat(prompt, [])
+        return (response.content or "").strip() or "早期上下文已压缩，但摘要为空。"
 
     @staticmethod
     def _finish(

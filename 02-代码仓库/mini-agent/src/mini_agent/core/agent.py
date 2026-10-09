@@ -6,6 +6,7 @@ from typing import Iterable
 
 from mini_agent.adapters.factory import ChatAdapter, create_adapter
 from mini_agent.config import Settings
+from mini_agent.core.context import ContextManager
 from mini_agent.core.loop import AgentCore
 from mini_agent.core.types import AgentRun
 from mini_agent.tools.builtin import BUILTIN_TOOLS
@@ -23,6 +24,7 @@ class Agent:
         tools: Iterable[ToolDefinition | object] | None = None,
         adapter: ChatAdapter | None = None,
         registry: ToolRegistry | None = None,
+        context_manager: ContextManager | None = None,
         settings: Settings | None = None,
     ) -> None:
         self.settings = settings or Settings()
@@ -53,6 +55,14 @@ class Agent:
             self.adapter,
             self.max_iterations,
             registry=self.registry,
+            context_manager=context_manager or ContextManager(
+                token_budget=self.settings.context_token_budget,
+                recent_turns=self.settings.context_recent_turns,
+                enabled=self.settings.context_compression_enabled,
+                tool_output_max_chars=self.settings.context_tool_output_max_chars,
+                tool_output_head_chars=self.settings.context_tool_output_head_chars,
+                tool_output_tail_chars=self.settings.context_tool_output_tail_chars,
+            ),
         )
 
     def run(self, task: str) -> AgentRun:

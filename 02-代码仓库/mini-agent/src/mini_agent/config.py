@@ -37,6 +37,14 @@ class Settings(BaseSettings):
     max_iterations: int = 10
     sandbox_dir: str = "data"
 
+    # Context compression (Stage 4)
+    context_compression_enabled: bool = True
+    context_token_budget: int = 8192
+    context_recent_turns: int = 5
+    context_tool_output_max_chars: int = 2000
+    context_tool_output_head_chars: int = 1000
+    context_tool_output_tail_chars: int = 500
+
     # Tools
     tool_timeout_seconds: float = 30.0
 

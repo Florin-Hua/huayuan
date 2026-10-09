@@ -1,7 +1,7 @@
 [project]
 name = "mini-agent"
-version = "0.3.0"
-description = "MiniAgent: 从零自研的 mini agent 框架（阶段3：多模型适配）"
+version = "0.4.0"
+description = "MiniAgent: 从零自研的 mini agent 框架（阶段4：上下文压缩）"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -10,6 +10,7 @@ dependencies = [
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
     "rich>=13.7",
+    "tiktoken>=0.7",
 ]
 
 [project.optional-dependencies]

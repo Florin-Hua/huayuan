@@ -1,6 +1,6 @@
 # MiniAgent
 
-从零自研的 mini agent 框架。当前进度：阶段3（多模型适配）。
+从零自研的 mini agent 框架。当前进度：阶段4（上下文压缩）。
 
 ## 快速开始
 
@@ -53,7 +53,22 @@ CLI 可以临时覆盖 provider：
 .venv\Scripts\python.exe -m pytest
 ```
 
-当前结果：`31 passed`。测试使用 fake client 与录制 fixture，不访问网络、不消耗 API key。
+当前结果：`37 passed`。测试使用 fake client、录制 fixture 与 scripted adapter，不访问网络、不消耗 API key。
+
+## 上下文压缩
+
+默认开启，预算 8192 token，最近 5 轮保留原文，更早轮次滚动摘要；工具输出超过 2000 字符时保留头 1000 + 尾 500。
+
+```env
+CONTEXT_COMPRESSION_ENABLED=true
+CONTEXT_TOKEN_BUDGET=8192
+CONTEXT_RECENT_TURNS=5
+CONTEXT_TOOL_OUTPUT_MAX_CHARS=2000
+CONTEXT_TOOL_OUTPUT_HEAD_CHARS=1000
+CONTEXT_TOOL_OUTPUT_TAIL_CHARS=500
+```
+
+长任务运行时，CLI 会显示 `上下文压缩：N 次`；关闭压缩后超预算会以 `context_limit` 优雅终止。
 
 ## 自定义工具
 
@@ -91,8 +106,16 @@ print(result.answer)
 - CLI `--provider openai/anthropic`
 - AgentCore / ReAct / ToolRegistry 不感知供应商格式
 
+### 阶段4 · 上下文压缩
+
+- `ContextManager`：tiktoken token 估算与上下文预算
+- 滚动摘要：最近 5 轮原文，早期历史交给当前模型压缩
+- 工具输出截断：头 1000 + 尾 500 + 省略标记
+- 注入顺序：system → memory → compressed history → current input → recent turns
+- 超预算关闭压缩时返回 `context_limit`
+
 ## 当前验收说明
 
-单元测试 31/31 通过。真实 OpenAI 调用当前因 `api.openai.com` 网络超时被阻断；Anthropic 网络可达但缺少有效 `ANTHROPIC_API_KEY`。待网络或密钥配置后按根仓库 `01-阶段进程/第3阶段-多模型适配.md` 中的命令重试。
+单元测试 37/37 通过。真实 OpenAI 调用当前因 `api.openai.com` 网络超时被阻断；Anthropic 网络可达但缺少有效 `ANTHROPIC_API_KEY`。待网络或密钥配置后按根仓库 `01-阶段进程/第3阶段-多模型适配.md` 中的命令重试。
 
 完整设计见仓库根 `01-阶段进程/` 各阶段文档。
