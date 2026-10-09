@@ -9,6 +9,7 @@ from mini_agent.config import Settings
 from mini_agent.core.context import ContextManager
 from mini_agent.core.loop import AgentCore
 from mini_agent.core.types import AgentRun, Message
+from mini_agent.mcp_tools import McpToolAdapter
 from mini_agent.memory import (
     MemoryExtractor,
     MemoryStore,
@@ -29,6 +30,7 @@ class Agent:
         max_iterations: int | None = None,
         sandbox_dir: str | Path | None = None,
         tools: Iterable[ToolDefinition | object] | None = None,
+        mcp_server_command: str | list[str] | None = None,
         adapter: ChatAdapter | None = None,
         registry: ToolRegistry | None = None,
         context_manager: ContextManager | None = None,
@@ -69,6 +71,19 @@ class Agent:
             candidates = tools if tools is not None else BUILTIN_TOOLS
             for candidate in candidates:
                 self.registry.register(candidate)
+
+        self.mcp_adapter: McpToolAdapter | None = None
+        resolved_mcp_command = (
+            mcp_server_command
+            if mcp_server_command is not None
+            else self.settings.mcp_server_command
+        )
+        if resolved_mcp_command:
+            self.mcp_adapter = McpToolAdapter(
+                resolved_mcp_command,
+                timeout_seconds=self.settings.mcp_tool_timeout_seconds,
+            )
+            self.mcp_adapter.register_tools(self.registry)
 
         if self.memory_store is not None and self.registry.get("save_memory") is None:
             self.registry.register(create_save_memory_tool(self.memory_store))
@@ -122,6 +137,8 @@ class Agent:
             self.memory_store.close()
         if self.trace_store is not None:
             self.trace_store.close()
+        if self.mcp_adapter is not None:
+            self.mcp_adapter.close()
 
     def __enter__(self) -> "Agent":
         return self

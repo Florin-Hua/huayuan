@@ -1,6 +1,6 @@
 # MiniAgent
 
-从零自研的 mini agent 框架。当前进度：阶段6（健壮性与Trace）。
+从零自研的 mini agent 框架。当前进度：阶段7（MCP兼容）。
 
 ## 快速开始
 
@@ -53,7 +53,7 @@ CLI 可以临时覆盖 provider：
 .venv\Scripts\python.exe -m pytest
 ```
 
-当前结果：`54 passed`。测试使用 fake client、录制 fixture、scripted adapter 与失败注入，不访问网络、不消耗 API key。
+当前结果：`59 passed`。测试使用 fake client、录制 fixture、scripted adapter、失败注入与真实 stdio MCP 子进程；除 MCP 子进程外不访问网络、不消耗 API key。
 
 ## 上下文压缩
 
@@ -115,6 +115,31 @@ Trace 保存 run 汇总与每一步状态、工具名、参数、结果、token 
 mini trace <run_id>
 ```
 
+## MCP 兼容
+
+内置最小 MCP server 暴露两个示例工具：
+
+```powershell
+.venv\Scripts\python.exe -m mini_agent.mcp_server
+# 或
+mini-mcp-server
+```
+
+在 run 时接入：
+
+```powershell
+mini run "用 MCP 计算 19 + 23" --mcp-server ".venv\Scripts\python.exe -m mini_agent.mcp_server"
+```
+
+也可以在 `.env` 中配置：
+
+```env
+MCP_SERVER_COMMAND=python -m mini_agent.mcp_server
+MCP_TOOL_TIMEOUT_SECONDS=30
+```
+
+`McpToolAdapter` 会把 MCP `tools/list` 转成标准 `ToolDefinition`，模型看到的 schema 与本地工具一致；`tools/call` 的结果和错误也会归一化后回喂模型。
+
 ## 自定义工具
 
 ```python
@@ -151,6 +176,14 @@ print(result.answer)
 - CLI `--provider openai/anthropic`
 - AgentCore / ReAct / ToolRegistry 不感知供应商格式
 
+### 阶段7 · MCP兼容
+
+- MCP Python SDK 2.x 最小 stdio server：`mcp_echo`、`mcp_add`
+- `McpToolAdapter`：工具发现、schema 转换、调用转发、错误归一化
+- 后台 asyncio 线程桥接同步 ToolRegistry
+- CLI：`mini run --mcp-server "..."`
+- 安全边界：server 命令只能由用户配置，模型不能自行启动
+
 ### 阶段6 · 健壮性与Trace
 
 - `ModelResponseError`：非法 JSON / 空 tool call 被归类为可自愈解析错误
@@ -178,6 +211,6 @@ print(result.answer)
 
 ## 当前验收说明
 
-单元测试 54/54 通过。真实 OpenAI 调用当前因 `api.openai.com` 网络超时被阻断；Anthropic 网络可达但缺少有效 `ANTHROPIC_API_KEY`。待网络或密钥配置后按根仓库 `01-阶段进程/第3阶段-多模型适配.md` 与 `第5阶段-记忆系统.md` 中的命令重试。
+单元测试 59/59 通过。真实 OpenAI 调用当前因 `api.openai.com` 网络超时被阻断；Anthropic 网络可达但缺少有效 `ANTHROPIC_API_KEY`。待网络或密钥配置后按根仓库 `01-阶段进程/第3阶段-多模型适配.md` 与 `第5阶段-记忆系统.md` 中的命令重试。
 
 完整设计见仓库根 `01-阶段进程/` 各阶段文档。

@@ -54,6 +54,10 @@ class Settings(BaseSettings):
     memory_top_k: int = 3
     memory_dimension: int = 256
 
+    # MCP compatibility (Stage 7)
+    mcp_server_command: str | None = None
+    mcp_tool_timeout_seconds: float = 30.0
+
     # Robustness & Trace (Stage 6)
     token_budget: int = 100_000
     parse_retry_limit: int = 2

@@ -5,6 +5,7 @@ from mini_agent.adapters.openai import OpenAIAdapter
 from mini_agent.core.agent import Agent
 from mini_agent.core.context import ContextManager
 from mini_agent.memory import MemoryStore
+from mini_agent.mcp_tools import McpToolAdapter
 from mini_agent.trace import TraceStore
 from mini_agent.tools.registry import ToolDefinition, ToolRegistry, tool
 
@@ -12,6 +13,7 @@ __all__ = [
     "Agent",
     "ContextManager",
     "MemoryStore",
+    "McpToolAdapter",
     "TraceStore",
     "AnthropicAdapter",
     "OpenAIAdapter",

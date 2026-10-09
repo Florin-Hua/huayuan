@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import shlex
 from pathlib import Path
 
 from rich.console import Console
@@ -33,6 +34,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--sandbox",
         default=None,
         help="工具沙箱目录，默认读取 SANDBOX_DIR",
+    )
+    run.add_argument(
+        "--mcp-server",
+        default=None,
+        help=(
+            "MCP server 命令字符串，例如 "
+            "'python -m mini_agent.mcp_server'；路径含空格时请加引号"
+        ),
     )
 
     trace = sub.add_parser("trace", help="查看一次运行的执行轨迹")
@@ -207,6 +216,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     sandbox = Path(args.sandbox or settings.sandbox_dir).resolve()
     sandbox.mkdir(parents=True, exist_ok=True)
+    mcp_server_command = (
+        shlex.split(args.mcp_server) if args.mcp_server else None
+    )
 
     try:
         from mini_agent.core.agent import Agent
@@ -216,6 +228,7 @@ def main(argv: list[str] | None = None) -> int:
             max_iterations=max_iterations,
             sandbox_dir=sandbox,
             settings=settings,
+            mcp_server_command=mcp_server_command,
         ) as agent:
             result = agent.run(args.task)
     except Exception as exc:
