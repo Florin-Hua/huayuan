@@ -136,7 +136,8 @@ class ContextManager:
         memory = memory or []
         before_tokens = self.estimator.estimate_messages(history + memory)
         if before_tokens <= self.token_budget:
-            return PreparedContext(list(history))
+            messages = [history[0], *memory, *history[1:]]
+            return PreparedContext(messages)
 
         if not self.enabled:
             raise ContextBudgetExceeded(before_tokens)

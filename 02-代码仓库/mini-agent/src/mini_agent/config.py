@@ -48,6 +48,12 @@ class Settings(BaseSettings):
     # Tools
     tool_timeout_seconds: float = 30.0
 
+    # Memory (Stage 5)
+    memory_enabled: bool = True
+    memory_db_path: str = "data/memory.sqlite3"
+    memory_top_k: int = 3
+    memory_dimension: int = 256
+
     @field_validator("model_provider", mode="before")
     @classmethod
     def normalize_provider(cls, value: str) -> str:

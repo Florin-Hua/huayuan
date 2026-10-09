@@ -113,6 +113,7 @@ class AgentRun(BaseModel):
     iterations: int = 0
     steps: list[StepLog] = Field(default_factory=list)
     compressions: list[CompressionStats] = Field(default_factory=list)
+    memories_saved: list[str] = Field(default_factory=list)
     usage: Usage = Field(default_factory=Usage)
     termination_reason: str | None = None
     started_at: datetime = Field(default_factory=datetime.now)

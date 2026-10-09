@@ -54,7 +54,12 @@ class AgentCore:
             summarizer=self._summarize_history
         )
 
-    def run(self, task: str, sandbox) -> AgentRun:
+    def run(
+        self,
+        task: str,
+        sandbox,
+        memory: list[Message] | None = None,
+    ) -> AgentRun:
         """运行任务并返回完整轨迹（不抛业务异常）。"""
         run = AgentRun(
             run_id=uuid.uuid4().hex[:12],
@@ -71,7 +76,7 @@ class AgentCore:
             run.iterations = iteration
 
             try:
-                prepared = self.context_manager.prepare(history)
+                prepared = self.context_manager.prepare(history, memory=memory)
             except ContextBudgetExceeded as exc:
                 reason = f"上下文预算终止：{exc}"
                 run.steps.append(

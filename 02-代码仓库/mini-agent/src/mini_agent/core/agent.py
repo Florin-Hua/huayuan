@@ -8,7 +8,13 @@ from mini_agent.adapters.factory import ChatAdapter, create_adapter
 from mini_agent.config import Settings
 from mini_agent.core.context import ContextManager
 from mini_agent.core.loop import AgentCore
-from mini_agent.core.types import AgentRun
+from mini_agent.core.types import AgentRun, Message
+from mini_agent.memory import (
+    MemoryExtractor,
+    MemoryStore,
+    create_save_memory_tool,
+    memory_to_message,
+)
 from mini_agent.tools.builtin import BUILTIN_TOOLS
 from mini_agent.tools.registry import ToolDefinition, ToolRegistry
 
@@ -28,6 +34,14 @@ class Agent:
         settings: Settings | None = None,
     ) -> None:
         self.settings = settings or Settings()
+        self.memory_store = (
+            MemoryStore(
+                self.settings.memory_db_path,
+                dimension=self.settings.memory_dimension,
+            )
+            if self.settings.memory_enabled
+            else None
+        )
         self.model = model or self.settings.resolved_model
         self.max_iterations = (
             self.settings.max_iterations
@@ -50,6 +64,9 @@ class Agent:
             for candidate in candidates:
                 self.registry.register(candidate)
 
+        if self.memory_store is not None and self.registry.get("save_memory") is None:
+            self.registry.register(create_save_memory_tool(self.memory_store))
+
         self.adapter = adapter or create_adapter(self.settings, self.model)
         self.core = AgentCore(
             self.adapter,
@@ -66,5 +83,35 @@ class Agent:
         )
 
     def run(self, task: str) -> AgentRun:
-        """执行一次任务并返回结构化运行结果。"""
-        return self.core.run(task, self.sandbox)
+        """执行一次任务，并按配置检索/抽取长期记忆。"""
+        memory: list[Message] = []
+        if self.memory_store is not None:
+            matches = self.memory_store.search(
+                task, limit=self.settings.memory_top_k
+            )
+            message = memory_to_message(matches)
+            if message is not None:
+                memory.append(message)
+
+        result = self.core.run(task, self.sandbox, memory=memory)
+
+        if self.memory_store is not None and result.status.value == "success":
+            try:
+                result.memories_saved = MemoryExtractor(
+                    self.adapter, self.memory_store
+                ).extract(task, result.answer or "", result.run_id)
+            except Exception:
+                # 记忆抽取失败不影响主任务结果；阶段6 Trace 再记录失败原因。
+                result.memories_saved = []
+        return result
+
+    def close(self) -> None:
+        """释放数据库连接。"""
+        if self.memory_store is not None:
+            self.memory_store.close()
+
+    def __enter__(self) -> "Agent":
+        return self
+
+    def __exit__(self, exc_type, exc, traceback) -> None:
+        self.close()

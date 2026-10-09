@@ -1,6 +1,6 @@
 # MiniAgent
 
-从零自研的 mini agent 框架。当前进度：阶段4（上下文压缩）。
+从零自研的 mini agent 框架。当前进度：阶段5（记忆系统）。
 
 ## 快速开始
 
@@ -53,7 +53,7 @@ CLI 可以临时覆盖 provider：
 .venv\Scripts\python.exe -m pytest
 ```
 
-当前结果：`37 passed`。测试使用 fake client、录制 fixture 与 scripted adapter，不访问网络、不消耗 API key。
+当前结果：`44 passed`。测试使用 fake client、录制 fixture 与 scripted adapter，不访问网络、不消耗 API key。
 
 ## 上下文压缩
 
@@ -69,6 +69,27 @@ CONTEXT_TOOL_OUTPUT_TAIL_CHARS=500
 ```
 
 长任务运行时，CLI 会显示 `上下文压缩：N 次`；关闭压缩后超预算会以 `context_limit` 优雅终止。
+
+## 长期记忆
+
+记忆默认保存在 `data/memory.sqlite3`，使用 SQLite + sqlite-vec 做向量检索。任务开始会注入 top-3 相关记忆，任务结束后自动抽取值得保存的事实，模型也可以调用 `save_memory` 工具主动保存。
+
+```env
+MEMORY_ENABLED=true
+MEMORY_DB_PATH=data/memory.sqlite3
+MEMORY_TOP_K=3
+MEMORY_DIMENSION=256
+```
+
+CLI：
+
+```powershell
+mini memory list
+mini memory search "导师" --top-k 3
+mini memory delete 1
+```
+
+默认向量器是离线 HashingEmbedder，适合测试与无网络环境；后续可通过 Embedder 协议替换为语义 embedding。
 
 ## 自定义工具
 
@@ -106,6 +127,14 @@ print(result.answer)
 - CLI `--provider openai/anthropic`
 - AgentCore / ReAct / ToolRegistry 不感知供应商格式
 
+### 阶段5 · 记忆系统
+
+- `MemoryStore`：SQLite + sqlite-vec，保存内容、embedding、来源 run_id、创建时间
+- 任务开始检索 top-3 相关记忆并注入 system prompt
+- `save_memory` 工具支持模型主动保存事实
+- 任务结束后用一次模型调用自动抽取长期事实
+- CLI：`mini memory list / search / delete`
+
 ### 阶段4 · 上下文压缩
 
 - `ContextManager`：tiktoken token 估算与上下文预算
@@ -116,6 +145,6 @@ print(result.answer)
 
 ## 当前验收说明
 
-单元测试 37/37 通过。真实 OpenAI 调用当前因 `api.openai.com` 网络超时被阻断；Anthropic 网络可达但缺少有效 `ANTHROPIC_API_KEY`。待网络或密钥配置后按根仓库 `01-阶段进程/第3阶段-多模型适配.md` 中的命令重试。
+单元测试 44/44 通过。真实 OpenAI 调用当前因 `api.openai.com` 网络超时被阻断；Anthropic 网络可达但缺少有效 `ANTHROPIC_API_KEY`。待网络或密钥配置后按根仓库 `01-阶段进程/第3阶段-多模型适配.md` 与 `第5阶段-记忆系统.md` 中的命令重试。
 
 完整设计见仓库根 `01-阶段进程/` 各阶段文档。
