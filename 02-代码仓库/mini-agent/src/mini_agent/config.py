@@ -1,13 +1,16 @@
 """配置：从 .env 读取（密钥只放 .env，禁止入库）。"""
 from __future__ import annotations
 
+from typing import Literal
+
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     """MiniAgent 配置。
 
-    环境变量名与 .env.example 一致，可直接复用已有凭证配置。
+    环境变量名与 .env.example 一致。MODEL_NAME 是新名称，LLM_MODEL 为兼容旧配置保留。
     """
 
     model_config = SettingsConfigDict(
@@ -16,10 +19,19 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # 模型
+    # 模型与 provider
+    model_provider: Literal["openai", "anthropic"] = "openai"
+    model_name: str | None = None
+    llm_model: str = "gpt-4o-mini"
+
+    # OpenAI 兼容：GPT / DeepSeek / Qwen 等均可通过 base_url 切换
     openai_base_url: str = "https://api.openai.com/v1"
     openai_api_key: str = ""
-    llm_model: str = "gpt-4o-mini"
+
+    # Anthropic 原生接口
+    anthropic_base_url: str = "https://api.anthropic.com"
+    anthropic_api_key: str = ""
+    anthropic_max_tokens: int = 1024
 
     # Agent
     max_iterations: int = 10
@@ -27,6 +39,16 @@ class Settings(BaseSettings):
 
     # Tools
     tool_timeout_seconds: float = 30.0
+
+    @field_validator("model_provider", mode="before")
+    @classmethod
+    def normalize_provider(cls, value: str) -> str:
+        return value.strip().lower()
+
+    @property
+    def resolved_model(self) -> str:
+        """优先使用 MODEL_NAME，兼容旧 LLM_MODEL。"""
+        return self.model_name or self.llm_model
 
 
 def load_settings() -> Settings:

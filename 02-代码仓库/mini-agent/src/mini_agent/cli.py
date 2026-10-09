@@ -7,7 +7,6 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from mini_agent.adapters.openai import OpenAIAdapter
 from mini_agent.config import load_settings
 from mini_agent.core.types import AgentRun, RunStatus
 
@@ -17,7 +16,13 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
     run = sub.add_parser("run", help="运行一个任务")
     run.add_argument("task", help="要完成的任务描述")
-    run.add_argument("--model", help="覆盖 .env 中的 LLM_MODEL")
+    run.add_argument("--model", help="覆盖 .env 中的 MODEL_NAME / LLM_MODEL")
+    run.add_argument(
+        "--provider",
+        choices=["openai", "anthropic"],
+        default=None,
+        help="覆盖 .env 中的 MODEL_PROVIDER",
+    )
     run.add_argument(
         "--max-iterations", type=int, default=None, help="覆盖最大迭代次数"
     )
@@ -56,9 +61,13 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     console = Console()
     settings = load_settings()
+    if args.provider:
+        settings.model_provider = args.provider
 
-    model = args.model or settings.llm_model
-    max_iterations = args.max_iterations or settings.max_iterations
+    model = args.model or settings.resolved_model
+    max_iterations = (
+        settings.max_iterations if args.max_iterations is None else args.max_iterations
+    )
     sandbox = Path(args.sandbox or settings.sandbox_dir).resolve()
     sandbox.mkdir(parents=True, exist_ok=True)
 
@@ -69,7 +78,6 @@ def main(argv: list[str] | None = None) -> int:
             model=model,
             max_iterations=max_iterations,
             sandbox_dir=sandbox,
-            adapter=OpenAIAdapter(settings, model),
             settings=settings,
         )
         result = agent.run(args.task)

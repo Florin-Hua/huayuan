@@ -1,11 +1,12 @@
 [project]
 name = "mini-agent"
-version = "0.1.0"
-description = "MiniAgent: 从零自研的 mini agent 框架（阶段1：最小 ReAct 循环）"
+version = "0.3.0"
+description = "MiniAgent: 从零自研的 mini agent 框架（阶段3：多模型适配）"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "openai>=1.40.0",
+    "anthropic>=0.40.0",
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
     "rich>=13.7",

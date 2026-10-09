@@ -4,9 +4,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable
 
-from mini_agent.adapters.openai import OpenAIAdapter
+from mini_agent.adapters.factory import ChatAdapter, create_adapter
 from mini_agent.config import Settings
-from mini_agent.core.loop import AgentCore, ChatAdapter
+from mini_agent.core.loop import AgentCore
 from mini_agent.core.types import AgentRun
 from mini_agent.tools.builtin import BUILTIN_TOOLS
 from mini_agent.tools.registry import ToolDefinition, ToolRegistry
@@ -26,7 +26,7 @@ class Agent:
         settings: Settings | None = None,
     ) -> None:
         self.settings = settings or Settings()
-        self.model = model or self.settings.llm_model
+        self.model = model or self.settings.resolved_model
         self.max_iterations = (
             self.settings.max_iterations
             if max_iterations is None
@@ -48,7 +48,7 @@ class Agent:
             for candidate in candidates:
                 self.registry.register(candidate)
 
-        self.adapter = adapter or OpenAIAdapter(self.settings, self.model)
+        self.adapter = adapter or create_adapter(self.settings, self.model)
         self.core = AgentCore(
             self.adapter,
             self.max_iterations,

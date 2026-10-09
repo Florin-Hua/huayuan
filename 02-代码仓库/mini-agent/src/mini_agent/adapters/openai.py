@@ -11,11 +11,16 @@ from mini_agent.core.types import Message, ModelResponse, ToolCall, Usage
 
 
 class OpenAIAdapter:
-    """阶段1 只实现 OpenAI 兼容接口。"""
+    """OpenAI 兼容接口适配器，覆盖 GPT/DeepSeek/Qwen 等兼容服务。"""
 
-    def __init__(self, settings: Settings, model: str | None = None) -> None:
-        self.model = model or settings.llm_model
-        self._client = OpenAI(
+    def __init__(
+        self,
+        settings: Settings,
+        model: str | None = None,
+        client: Any | None = None,
+    ) -> None:
+        self.model = model or settings.resolved_model
+        self._client = client or OpenAI(
             api_key=settings.openai_api_key,
             base_url=settings.openai_base_url,
         )
@@ -28,11 +33,16 @@ class OpenAIAdapter:
             tools=tools,
             temperature=0.2,
         )
+        return self.to_model_response(response)
+
+    @staticmethod
+    def to_model_response(response: Any) -> ModelResponse:
+        """OpenAI response -> MiniAgent 统一 ModelResponse。"""
         if not response.choices:
             raise ValueError("model response has no choices")
         choice = response.choices[0]
         message = choice.message
-        tool_calls = [self._to_tool_call(call) for call in message.tool_calls or []]
+        tool_calls = [OpenAIAdapter._to_tool_call(call) for call in message.tool_calls or []]
         usage = None
         if response.usage is not None:
             usage = Usage(

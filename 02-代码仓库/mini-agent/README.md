@@ -1,6 +1,6 @@
 # MiniAgent
 
-从零自研的 mini agent 框架。当前进度：阶段2（工具系统）。
+从零自研的 mini agent 框架。当前进度：阶段3（多模型适配）。
 
 ## 快速开始
 
@@ -17,13 +17,43 @@ mini run "读取 data/notes.txt，统计行数，把结果写入 data/result.txt
 .venv\Scripts\python.exe -m mini_agent.cli run "读取 notes.txt 并告诉我内容" --sandbox data
 ```
 
+## 多模型配置
+
+MiniAgent 内部使用统一消息格式，供应商差异被限制在 adapter 层。当前支持：
+
+- `openai`：OpenAI / DeepSeek / Qwen 等 OpenAI 兼容接口；
+- `anthropic`：Anthropic Messages API 原生接口。
+
+`.env` 示例：
+
+```env
+MODEL_PROVIDER=openai
+MODEL_NAME=gpt-4o-mini
+
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_API_KEY=sk-your-key
+
+# 切换 Anthropic：
+# MODEL_PROVIDER=anthropic
+# MODEL_NAME=claude-sonnet-4-5
+# ANTHROPIC_API_KEY=sk-ant-your-key
+# ANTHROPIC_BASE_URL=https://api.anthropic.com
+# ANTHROPIC_MAX_TOKENS=1024
+```
+
+CLI 可以临时覆盖 provider：
+
+```powershell
+.venv\Scripts\python.exe -m mini_agent.cli run "读取 notes.txt，统计行数，把结果写入 data/result.txt" --provider anthropic --sandbox data
+```
+
 ## 测试
 
 ```powershell
 .venv\Scripts\python.exe -m pytest
 ```
 
-当前结果：`21 passed`。测试使用 ScriptedAdapter，不访问网络。
+当前结果：`31 passed`。测试使用 fake client 与录制 fixture，不访问网络、不消耗 API key。
 
 ## 自定义工具
 
@@ -42,7 +72,9 @@ print(result.answer)
 
 工具参数可用 Pydantic 模型显式声明，也可以从函数签名自动生成。执行失败、参数错误、超时和幻觉工具都会被归一化为结构化错误并回喂模型。
 
-## 阶段2范围
+## 已实现范围
+
+### 阶段2 · 工具系统
 
 - `@tool` 装饰器与 Pydantic schema 自动生成
 - `ToolRegistry`：注册、查找、schema 输出、统一执行
@@ -51,8 +83,16 @@ print(result.answer)
 - 沙箱路径逃逸拦截
 - 多步任务：读取 -> 写入 -> 读回验证
 
+### 阶段3 · 多模型适配
+
+- `OpenAIAdapter`：OpenAI 兼容接口
+- `AnthropicAdapter`：Anthropic 原生 Messages API 与 tool_use/tool_result 转换
+- `create_adapter()`：按 `MODEL_PROVIDER` 选择 provider
+- CLI `--provider openai/anthropic`
+- AgentCore / ReAct / ToolRegistry 不感知供应商格式
+
 ## 当前验收说明
 
-单元测试全部通过；真实 OpenAI 调用当前因 `api.openai.com` 网络超时被阻断。框架将该异常处理为 `PARSE_ERROR`。网络恢复后按根仓库 `01-阶段进程/第2阶段-工具系统.md` 中的命令重试。
+单元测试 31/31 通过。真实 OpenAI 调用当前因 `api.openai.com` 网络超时被阻断；Anthropic 网络可达但缺少有效 `ANTHROPIC_API_KEY`。待网络或密钥配置后按根仓库 `01-阶段进程/第3阶段-多模型适配.md` 中的命令重试。
 
 完整设计见仓库根 `01-阶段进程/` 各阶段文档。
