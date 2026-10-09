@@ -1,7 +1,7 @@
 [project]
 name = "mini-agent"
-version = "0.7.0"
-description = "MiniAgent: 从零自研的 mini agent 框架（阶段7：MCP兼容）"
+version = "0.8.0"
+description = "MiniAgent: 从零自研的 mini agent 框架（阶段8：评测与交付）"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

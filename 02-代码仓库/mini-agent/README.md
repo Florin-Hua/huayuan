@@ -1,6 +1,23 @@
 # MiniAgent
 
-从零自研的 mini agent 框架。当前进度：阶段7（MCP兼容）。
+> MiniAgent 0.8.0：从零自研的 mini agent 框架。当前完成第0-8阶段，包含 ReAct 循环、工具系统、多模型适配、上下文压缩、记忆、健壮性与 Trace、MCP 兼容和 scripted 框架评测。
+
+## 架构
+
+```text
+CLI / Python API
+      │
+   Agent 门面
+      │
+   AgentCore ReAct 状态机
+ THINK → ACT → OBSERVE → REFLECT → THINK / END
+      │              │              │
+ ModelAdapter   ToolRegistry     Guard
+ OpenAI/Anthropic  本地工具       迭代 / token / 震荡
+                   MCP Tool       │
+ ContextManager  MemoryStore   TraceStore
+ 滚动摘要+截断   SQLite+vec    SQLite trace
+```
 
 ## 快速开始
 
@@ -44,7 +61,7 @@ OPENAI_API_KEY=sk-your-key
 CLI 可以临时覆盖 provider：
 
 ```powershell
-.venv\Scripts\python.exe -m mini_agent.cli run "读取 notes.txt，统计行数，把结果写入 data/result.txt" --provider anthropic --sandbox data
+.venv\Scripts\python.exe -m mini_agent.cli run "读取 notes.txt，统计行数，把结果写入 result.txt" --provider anthropic --sandbox data
 ```
 
 ## 测试
@@ -53,7 +70,38 @@ CLI 可以临时覆盖 provider：
 .venv\Scripts\python.exe -m pytest
 ```
 
-当前结果：`59 passed`。测试使用 fake client、录制 fixture、scripted adapter、失败注入与真实 stdio MCP 子进程；除 MCP 子进程外不访问网络、不消耗 API key。
+当前结果：`64 passed in 15.37s`。测试使用 fake client、录制 fixture、scripted adapter、失败注入与真实 stdio MCP 子进程；除 MCP 子进程外不访问网络、不消耗 API key。
+
+## 评测
+
+阶段8评测定位为 **框架机制评测**，不是商业模型能力评测。`scripted-strong` 按数据集脚本调用工具，`scripted-baseline` 不调用工具，二者均通过真实 Agent、工具、上下文与记忆链路执行。
+
+```powershell
+.venv\Scripts\python.exe eval\runner.py
+```
+
+输出写入 `eval/results/selfbuilt_scripted.json`：
+
+| 模型策略 | 压缩 | 记忆 | 成功率 | 平均迭代 | 平均 token | 失败恢复率 |
+|---|---:|---:|---:|---:|---:|---:|
+| scripted-strong | ON | ON | 100.00% | 2.40 | 417.5 | 100.00% |
+| scripted-strong | ON | OFF | 96.67% | 2.40 | 326.4 | 100.00% |
+| scripted-strong | OFF | ON | 86.67% | 2.27 | 325.0 | 100.00% |
+| scripted-strong | OFF | OFF | 83.33% | 2.27 | 245.7 | 100.00% |
+| scripted-baseline | ON | ON | 6.67% | 1.00 | 173.8 | 0.00% |
+| scripted-baseline | ON | OFF | 3.33% | 1.00 | 84.6 | 0.00% |
+| scripted-baseline | OFF | ON | 6.67% | 1.00 | 173.8 | 0.00% |
+| scripted-baseline | OFF | OFF | 3.33% | 1.00 | 84.6 | 0.00% |
+
+自建数据集 `eval/selfbuilt.json` 共 30 条，覆盖 arithmetic、file_io、mock_search、context_compression、memory、failure_recovery。其中 8 条失败恢复任务全部恢复；关闭压缩后 4 条长上下文任务全部 `context_limit`；关闭记忆后 SB022 失败。
+
+### GAIA 状态
+
+GAIA `gaia-benchmark/GAIA` 是 HuggingFace gated dataset。本机没有授权 token，`eval/gaia_subset.json` 仅保存 gated 状态和筛选标准，`tasks` 为空，不包含未授权数据。获得授权并自行下载 validation JSONL 后可运行：
+
+```powershell
+.venv\Scripts\python.exe eval\select_gaia.py --input data\gaia_validation.jsonl --output eval\gaia_subset.json --limit 30
+```
 
 ## 上下文压缩
 
@@ -72,7 +120,7 @@ CONTEXT_TOOL_OUTPUT_TAIL_CHARS=500
 
 ## 长期记忆
 
-记忆默认保存在 `data/memory.sqlite3`，使用 SQLite + sqlite-vec 做向量检索。任务开始会注入 top-3 相关记忆，任务结束后自动抽取值得保存的事实，模型也可以调用 `save_memory` 工具主动保存。
+记忆默认保存在 `data/memory.sqlite3`，使用 SQLite + sqlite-vec 做向量检索。任务开始注入 top-3 相关记忆，任务结束后自动抽取值得保存的事实，模型也可以调用 `save_memory` 工具主动保存。
 
 ```env
 MEMORY_ENABLED=true
@@ -99,7 +147,7 @@ AgentCore 内置三层护栏：
 - 单 run token 预算：默认 100,000，超限返回 `token_budget`；
 - 震荡检测：连续两轮完全相同的工具与参数，返回 `oscillation`。
 
-模型输出解析失败时会回喂错误并重试，默认最多 2 次；工具异常和超时仍结构化回喂模型，不直接崩溃。
+模型输出解析失败时回喂错误并重试，默认最多 2 次；工具异常和超时仍结构化回喂模型，不直接崩溃。
 
 ```env
 MAX_ITERATIONS=10
@@ -138,7 +186,7 @@ MCP_SERVER_COMMAND=python -m mini_agent.mcp_server
 MCP_TOOL_TIMEOUT_SECONDS=30
 ```
 
-`McpToolAdapter` 会把 MCP `tools/list` 转成标准 `ToolDefinition`，模型看到的 schema 与本地工具一致；`tools/call` 的结果和错误也会归一化后回喂模型。
+`McpToolAdapter` 会把 MCP `tools/list` 转成标准 `ToolDefinition`，模型看到的 schema 与本地工具一致；`tools/call` 的结果和错误也会归一化后回喂模型。安全边界：server 命令只能由用户显式配置，模型不能自行启动 MCP server。
 
 ## 自定义工具
 
@@ -159,22 +207,48 @@ print(result.answer)
 
 ## 已实现范围
 
+### 阶段1 · 最小 ReAct 闭环
+
+- `AgentCore`：THINK / ACT / OBSERVE / REFLECT 状态机
+- 统一 `AgentRun` 返回状态、答案、usage、steps 与终止原因
+- 模型错误和工具错误均不直接崩溃
+- CLI `mini run`
+
 ### 阶段2 · 工具系统
 
 - `@tool` 装饰器与 Pydantic schema 自动生成
 - `ToolRegistry`：注册、查找、schema 输出、统一执行
-- 默认 30 秒工具超时，可通过 `.env` 配置
-- 内置工具：calculator、read_text_file、write_text_file、mock_web_search
-- 沙箱路径逃逸拦截
-- 多步任务：读取 -> 写入 -> 读回验证
+- 默认 30 秒工具超时
+- 内置 calculator、read_text_file、write_text_file、mock_web_search
+- 沙箱路径逃逸拦截与 AST 白名单计算器
 
 ### 阶段3 · 多模型适配
 
 - `OpenAIAdapter`：OpenAI 兼容接口
-- `AnthropicAdapter`：Anthropic 原生 Messages API 与 tool_use/tool_result 转换
-- `create_adapter()`：按 `MODEL_PROVIDER` 选择 provider
+- `AnthropicAdapter`：Messages API 与 tool_use/tool_result 转换
+- `create_adapter()` 按 `MODEL_PROVIDER` 选择 provider
 - CLI `--provider openai/anthropic`
-- AgentCore / ReAct / ToolRegistry 不感知供应商格式
+
+### 阶段4 · 上下文压缩
+
+- `ContextManager`：tiktoken 估算与上下文预算
+- 滚动摘要：最近 5 轮原文，早期历史交给当前模型压缩
+- 工具输出截断：头 1000 + 尾 500 + 省略标记
+- 注入顺序：system → memory → compressed history → current input → recent turns
+
+### 阶段5 · 记忆系统
+
+- `MemoryStore`：SQLite + sqlite-vec，保存内容、embedding、来源 run_id
+- 任务开始检索 top-3 相关记忆并注入 system prompt
+- `save_memory` 工具与任务结束自动抽取
+- CLI：`mini memory list / search / delete`
+
+### 阶段6 · 健壮性与Trace
+
+- `ModelResponseError` 与解析失败错误回喂重试
+- Guard：最大迭代、token 预算、连续相同工具调用震荡
+- `TraceStore`：SQLite 保存 run 汇总与逐步 trace
+- CLI：`mini trace <run_id>`
 
 ### 阶段7 · MCP兼容
 
@@ -182,35 +256,39 @@ print(result.answer)
 - `McpToolAdapter`：工具发现、schema 转换、调用转发、错误归一化
 - 后台 asyncio 线程桥接同步 ToolRegistry
 - CLI：`mini run --mcp-server "..."`
-- 安全边界：server 命令只能由用户配置，模型不能自行启动
 
-### 阶段6 · 健壮性与Trace
+### 阶段8 · 评测与交付
 
-- `ModelResponseError`：非法 JSON / 空 tool call 被归类为可自愈解析错误
-- 解析失败错误回喂重试，默认最多 2 次；仍失败则优雅终止
-- Guard：最大迭代、100k token 预算、连续相同工具调用震荡检测
-- `TraceStore`：SQLite 保存 run 汇总与逐步 trace
-- CLI：`mini trace <run_id>`，rich 表格展示
-- 失败注入测试：非法输出、工具异常、工具超时、震荡调用、token 超限
+- 30 条自建框架机制评测数据集
+- 8 组 scripted 消融实验：strong/baseline × 压缩 ON/OFF × 记忆 ON/OFF
+- 逐任务 records、分类指标、失败恢复率
+- GAIA gated 状态与授权后本地抽样脚本
+- 5 个新增评测测试，全量 64/64 通过
 
-### 阶段5 · 记忆系统
+## 代码规模与验收
 
-- `MemoryStore`：SQLite + sqlite-vec，保存内容、embedding、来源 run_id、创建时间
-- 任务开始检索 top-3 相关记忆并注入 system prompt
-- `save_memory` 工具支持模型主动保存事实
-- 任务结束后用一次模型调用自动抽取长期事实
-- CLI：`mini memory list / search / delete`
+| 范围 | 文件数 | 行数 |
+|---|---:|---:|
+| `src/mini_agent/` | 19 | 2369 |
+| `tests/` | 8 | 1262 |
+| `eval/` | 2 | 295 |
 
-### 阶段4 · 上下文压缩
+验收命令：
 
-- `ContextManager`：tiktoken token 估算与上下文预算
-- 滚动摘要：最近 5 轮原文，早期历史交给当前模型压缩
-- 工具输出截断：头 1000 + 尾 500 + 省略标记
-- 注入顺序：system → memory → compressed history → current input → recent turns
-- 超预算关闭压缩时返回 `context_limit`
+```powershell
+.venv\Scripts\python.exe -m pytest
+.venv\Scripts\python.exe eval\runner.py
+.venv\Scripts\python.exe -m compileall -q src tests eval
+```
 
-## 当前验收说明
+## 已知局限
 
-单元测试 59/59 通过。真实 OpenAI 调用当前因 `api.openai.com` 网络超时被阻断；Anthropic 网络可达但缺少有效 `ANTHROPIC_API_KEY`。待网络或密钥配置后按根仓库 `01-阶段进程/第3阶段-多模型适配.md` 与 `第5阶段-记忆系统.md` 中的命令重试。
+1. 阶段8是 scripted 框架评测，真实商业模型准确率未测；
+2. OpenAI 当前网络超时，Anthropic 缺少有效 key；
+3. GAIA 是 gated dataset，未授权前没有公开基准成绩；
+4. 默认 HashingEmbedder 语义能力有限，记忆泛化样本量小；
+5. 无 checkpoint 恢复、流式输出与并发调度；
+6. MCP 仅实现 stdio `tools/list` / `tools/call`；
+7. Python 线程池超时无法强制终止底层调用。
 
-完整设计见仓库根 `01-阶段进程/` 各阶段文档。
+完整设计见仓库根 `01-阶段进程/`，交付报告见 `03-交付物/`。

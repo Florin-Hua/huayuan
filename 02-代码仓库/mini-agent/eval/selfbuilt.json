@@ -1,0 +1,725 @@
+{
+  "name": "MiniAgent selfbuilt evaluation",
+  "tasks": [
+    {
+      "id": "SB001",
+      "task": "请精确计算：19 + 23",
+      "expected": "42",
+      "category": "arithmetic",
+      "baseline_direct": true,
+      "baseline_final": "我猜是 41。",
+      "tool_rounds": [
+        [
+          {
+            "name": "calculator",
+            "arguments": {
+              "expression": "19 + 23"
+            }
+          }
+        ]
+      ],
+      "final": "42"
+    },
+    {
+      "id": "SB002",
+      "task": "请精确计算：23 * 47 + 11",
+      "expected": "1092",
+      "category": "arithmetic",
+      "baseline_direct": true,
+      "baseline_final": "结果大概是 1000。",
+      "tool_rounds": [
+        [
+          {
+            "name": "calculator",
+            "arguments": {
+              "expression": "23 * 47 + 11"
+            }
+          }
+        ]
+      ],
+      "final": "1092"
+    },
+    {
+      "id": "SB003",
+      "task": "请精确计算：(7 + 3) * 12",
+      "expected": "120",
+      "category": "arithmetic",
+      "baseline_direct": true,
+      "baseline_final": "无法确定。",
+      "tool_rounds": [
+        [
+          {
+            "name": "calculator",
+            "arguments": {
+              "expression": "(7 + 3) * 12"
+            }
+          }
+        ]
+      ],
+      "final": "120"
+    },
+    {
+      "id": "SB004",
+      "task": "请精确计算：144 / 12",
+      "expected": "12",
+      "category": "arithmetic",
+      "baseline_direct": true,
+      "baseline_final": "可能是 11。",
+      "tool_rounds": [
+        [
+          {
+            "name": "calculator",
+            "arguments": {
+              "expression": "144 / 12"
+            }
+          }
+        ]
+      ],
+      "final": "12"
+    },
+    {
+      "id": "SB005",
+      "task": "请精确计算：2 ** 10 - 1",
+      "expected": "1023",
+      "category": "arithmetic",
+      "baseline_direct": true,
+      "baseline_final": "应该是 1000 左右。",
+      "tool_rounds": [
+        [
+          {
+            "name": "calculator",
+            "arguments": {
+              "expression": "2 ** 10 - 1"
+            }
+          }
+        ]
+      ],
+      "final": "1023"
+    },
+    {
+      "id": "SB006",
+      "task": "请精确计算：17 % 5",
+      "expected": "2",
+      "category": "arithmetic",
+      "baseline_direct": true,
+      "baseline_final": "我猜余数是 3。",
+      "tool_rounds": [
+        [
+          {
+            "name": "calculator",
+            "arguments": {
+              "expression": "17 % 5"
+            }
+          }
+        ]
+      ],
+      "final": "2"
+    },
+    {
+      "id": "SB007",
+      "task": "请精确计算：(128 - 50) // 3",
+      "expected": "26",
+      "category": "arithmetic",
+      "baseline_direct": true,
+      "baseline_final": "无法计算。",
+      "tool_rounds": [
+        [
+          {
+            "name": "calculator",
+            "arguments": {
+              "expression": "(128 - 50) // 3"
+            }
+          }
+        ]
+      ],
+      "final": "26"
+    },
+    {
+      "id": "SB008",
+      "task": "把文本 MiniAgent stage 8 写入 report.txt，然后告诉我写入结果。",
+      "expected": "已写入 report.txt，内容为 MiniAgent stage 8。",
+      "category": "file_io",
+      "baseline_direct": true,
+      "baseline_final": "我没有执行文件写入。",
+      "tool_rounds": [
+        [
+          {
+            "name": "write_text_file",
+            "arguments": {
+              "path": "report.txt",
+              "content": "MiniAgent stage 8"
+            }
+          },
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "report.txt"
+            }
+          }
+        ]
+      ],
+      "final": "已写入 report.txt，内容为 MiniAgent stage 8。"
+    },
+    {
+      "id": "SB009",
+      "task": "读取 source.txt 并告诉我第一行内容。",
+      "expected": "source.txt 第一行是 GAIA-like local fixture。",
+      "category": "file_io",
+      "baseline_direct": true,
+      "baseline_final": "文件内容未知。",
+      "tool_rounds": [
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "source.txt"
+            }
+          }
+        ]
+      ],
+      "final": "source.txt 第一行是 GAIA-like local fixture。",
+      "setup_files": {
+        "source.txt": "GAIA-like local fixture\nsecond line"
+      }
+    },
+    {
+      "id": "SB010",
+      "task": "把结论 MiniAgent eval complete 写入 results/final.txt。",
+      "expected": "已写入 results/final.txt，内容为 MiniAgent eval complete。",
+      "category": "file_io",
+      "baseline_direct": true,
+      "baseline_final": "未创建文件。",
+      "tool_rounds": [
+        [
+          {
+            "name": "write_text_file",
+            "arguments": {
+              "path": "results/final.txt",
+              "content": "MiniAgent eval complete"
+            }
+          }
+        ]
+      ],
+      "final": "已写入 results/final.txt，内容为 MiniAgent eval complete。"
+    },
+    {
+      "id": "SB011",
+      "task": "读取 data.txt 并总结其中的城市名。",
+      "expected": "data.txt 中的城市是 Shanghai。",
+      "category": "file_io",
+      "baseline_direct": true,
+      "baseline_final": "不知道城市。",
+      "tool_rounds": [
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "data.txt"
+            }
+          }
+        ]
+      ],
+      "final": "data.txt 中的城市是 Shanghai。",
+      "setup_files": {
+        "data.txt": "City: Shanghai\nCountry: China"
+      }
+    },
+    {
+      "id": "SB012",
+      "task": "请使用搜索工具查询：MiniAgent evaluation",
+      "expected": "MiniAgent mock result 1",
+      "category": "mock_search",
+      "baseline_direct": true,
+      "baseline_final": "搜索结果不可用。",
+      "tool_rounds": [
+        [
+          {
+            "name": "mock_web_search",
+            "arguments": {
+              "query": "MiniAgent evaluation"
+            }
+          }
+        ]
+      ],
+      "final": "MiniAgent mock result 1"
+    },
+    {
+      "id": "SB013",
+      "task": "请使用搜索工具查询：agent framework",
+      "expected": "MiniAgent mock result 1",
+      "category": "mock_search",
+      "baseline_direct": true,
+      "baseline_final": "我不知道。",
+      "tool_rounds": [
+        [
+          {
+            "name": "mock_web_search",
+            "arguments": {
+              "query": "agent framework"
+            }
+          }
+        ]
+      ],
+      "final": "MiniAgent mock result 1"
+    },
+    {
+      "id": "SB014",
+      "task": "请使用搜索工具查询：context compression",
+      "expected": "MiniAgent mock result 1",
+      "category": "mock_search",
+      "baseline_direct": true,
+      "baseline_final": "没有查询。",
+      "tool_rounds": [
+        [
+          {
+            "name": "mock_web_search",
+            "arguments": {
+              "query": "context compression"
+            }
+          }
+        ]
+      ],
+      "final": "MiniAgent mock result 1"
+    },
+    {
+      "id": "SB015",
+      "task": "请使用搜索工具查询：tool reliability",
+      "expected": "MiniAgent mock result 1",
+      "category": "mock_search",
+      "baseline_direct": true,
+      "baseline_final": "无法搜索。",
+      "tool_rounds": [
+        [
+          {
+            "name": "mock_web_search",
+            "arguments": {
+              "query": "tool reliability"
+            }
+          }
+        ]
+      ],
+      "final": "MiniAgent mock result 1"
+    },
+    {
+      "id": "SB016",
+      "task": "请使用搜索工具查询：MCP compatibility",
+      "expected": "MiniAgent mock result 1",
+      "category": "mock_search",
+      "baseline_direct": true,
+      "baseline_final": "未使用搜索工具。",
+      "tool_rounds": [
+        [
+          {
+            "name": "mock_web_search",
+            "arguments": {
+              "query": "MCP compatibility"
+            }
+          }
+        ]
+      ],
+      "final": "MiniAgent mock result 1"
+    },
+    {
+      "id": "SB017",
+      "task": "依次读取 long_1.txt、long_2.txt、long_3.txt，最后给出三个文件共同的关键词。",
+      "expected": "三个文件共同的关键词是 compression。",
+      "category": "context_compression",
+      "compression_sensitive": true,
+      "baseline_direct": true,
+      "baseline_final": "未读取长文件，无法判断。",
+      "setup_files": {
+        "long_1.txt": "compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression ",
+        "long_2.txt": "compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression ",
+        "long_3.txt": "compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression "
+      },
+      "tool_rounds": [
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "long_1.txt"
+            }
+          }
+        ],
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "long_2.txt"
+            }
+          }
+        ],
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "long_3.txt"
+            }
+          }
+        ]
+      ],
+      "final": "三个文件共同的关键词是 compression。"
+    },
+    {
+      "id": "SB018",
+      "task": "读取 context_a.txt、context_b.txt 和 context_c.txt，然后总结共同主题。",
+      "expected": "共同主题是 context compression。",
+      "category": "context_compression",
+      "compression_sensitive": true,
+      "baseline_direct": true,
+      "baseline_final": "没有读取上下文。",
+      "setup_files": {
+        "context_a.txt": "context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression ",
+        "context_b.txt": "context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression ",
+        "context_c.txt": "context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression context compression "
+      },
+      "tool_rounds": [
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "context_a.txt"
+            }
+          }
+        ],
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "context_b.txt"
+            }
+          }
+        ],
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "context_c.txt"
+            }
+          }
+        ]
+      ],
+      "final": "共同主题是 context compression。"
+    },
+    {
+      "id": "SB019",
+      "task": "依次查看 eval_1.txt、eval_2.txt、eval_3.txt，回答评测关注点。",
+      "expected": "评测关注点是 compression。",
+      "category": "context_compression",
+      "compression_sensitive": true,
+      "baseline_direct": true,
+      "baseline_final": "上下文太长，无法处理。",
+      "setup_files": {
+        "eval_1.txt": "compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression ",
+        "eval_2.txt": "compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression ",
+        "eval_3.txt": "compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression "
+      },
+      "tool_rounds": [
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "eval_1.txt"
+            }
+          }
+        ],
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "eval_2.txt"
+            }
+          }
+        ],
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "eval_3.txt"
+            }
+          }
+        ]
+      ],
+      "final": "评测关注点是 compression。"
+    },
+    {
+      "id": "SB020",
+      "task": "读取 three_files_1.txt、three_files_2.txt、three_files_3.txt 并提炼主题。",
+      "expected": "主题是 compression。",
+      "category": "context_compression",
+      "compression_sensitive": true,
+      "baseline_direct": true,
+      "baseline_final": "直接猜测为 unknown。",
+      "setup_files": {
+        "three_files_1.txt": "compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression ",
+        "three_files_2.txt": "compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression ",
+        "three_files_3.txt": "compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression compression "
+      },
+      "tool_rounds": [
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "three_files_1.txt"
+            }
+          }
+        ],
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "three_files_2.txt"
+            }
+          }
+        ],
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "three_files_3.txt"
+            }
+          }
+        ]
+      ],
+      "final": "主题是 compression。"
+    },
+    {
+      "id": "SB021",
+      "task": "请记住我的偏好：项目总结必须使用中文，并且保持简短。",
+      "expected": "已记住偏好：项目总结使用中文并保持简短。",
+      "category": "memory",
+      "memory_seed": true,
+      "baseline_direct": true,
+      "baseline_final": "已记住偏好：项目总结使用中文并保持简短。",
+      "tool_rounds": [],
+      "final": "已记住偏好：项目总结使用中文并保持简短。"
+    },
+    {
+      "id": "SB022",
+      "task": "根据我的偏好写一句 MiniAgent 项目总结。",
+      "expected": "中文总结：MiniAgent 已完成评测。",
+      "category": "memory",
+      "memory_sensitive": true,
+      "baseline_direct": true,
+      "baseline_final": "无法确定语言偏好。",
+      "tool_rounds": [],
+      "final": "中文总结：MiniAgent 已完成评测。"
+    },
+    {
+      "id": "SB023",
+      "task": "读取 missing.txt；如果不存在，请明确说明文件不存在。",
+      "expected": "missing.txt 不存在。",
+      "category": "failure_recovery",
+      "failure_recovery": true,
+      "baseline_direct": true,
+      "baseline_final": "读取失败，无法恢复。",
+      "tool_rounds": [
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "missing.txt"
+            }
+          }
+        ]
+      ],
+      "final": "missing.txt 不存在。"
+    },
+    {
+      "id": "SB024",
+      "task": "先尝试计算 100 / 0；如果失败，请改用 100 / 4 并给出结果。",
+      "expected": "25",
+      "category": "failure_recovery",
+      "failure_recovery": true,
+      "baseline_direct": true,
+      "baseline_final": "除零错误后无法继续。",
+      "tool_rounds": [
+        [
+          {
+            "name": "calculator",
+            "arguments": {
+              "expression": "100 / 0"
+            }
+          }
+        ],
+        [
+          {
+            "name": "calculator",
+            "arguments": {
+              "expression": "100 / 4"
+            }
+          }
+        ]
+      ],
+      "final": "25"
+    },
+    {
+      "id": "SB025",
+      "task": "读取 wrong.txt；如果失败，请改读 correct.txt。",
+      "expected": "correct.txt 内容是 recovered。",
+      "category": "failure_recovery",
+      "failure_recovery": true,
+      "baseline_direct": true,
+      "baseline_final": "没有找到正确文件。",
+      "tool_rounds": [
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "wrong.txt"
+            }
+          }
+        ],
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "correct.txt"
+            }
+          }
+        ]
+      ],
+      "final": "correct.txt 内容是 recovered。",
+      "setup_files": {
+        "correct.txt": "recovered"
+      }
+    },
+    {
+      "id": "SB026",
+      "task": "尝试写入 ../escape.txt；如果被沙箱拒绝，请改写 safe.txt。",
+      "expected": "已写入 safe.txt，内容为 sandboxed。",
+      "category": "failure_recovery",
+      "failure_recovery": true,
+      "baseline_direct": true,
+      "baseline_final": "路径被拒绝，任务失败。",
+      "tool_rounds": [
+        [
+          {
+            "name": "write_text_file",
+            "arguments": {
+              "path": "../escape.txt",
+              "content": "bad"
+            }
+          }
+        ],
+        [
+          {
+            "name": "write_text_file",
+            "arguments": {
+              "path": "safe.txt",
+              "content": "sandboxed"
+            }
+          }
+        ]
+      ],
+      "final": "已写入 safe.txt，内容为 sandboxed。"
+    },
+    {
+      "id": "SB027",
+      "task": "先调用不存在工具 web_fetch；如果不可用，请改用 mock_web_search 查询 recovery。",
+      "expected": "MiniAgent mock result 1",
+      "category": "failure_recovery",
+      "failure_recovery": true,
+      "baseline_direct": true,
+      "baseline_final": "工具不存在，任务终止。",
+      "tool_rounds": [
+        [
+          {
+            "name": "web_fetch",
+            "arguments": {
+              "url": "https://example.com"
+            }
+          }
+        ],
+        [
+          {
+            "name": "mock_web_search",
+            "arguments": {
+              "query": "recovery"
+            }
+          }
+        ]
+      ],
+      "final": "MiniAgent mock result 1"
+    },
+    {
+      "id": "SB028",
+      "task": "计算 999 ** 10000；如果超出限制，请改算 999 ** 2。",
+      "expected": "998001",
+      "category": "failure_recovery",
+      "failure_recovery": true,
+      "baseline_direct": true,
+      "baseline_final": "指数过大，无法恢复。",
+      "tool_rounds": [
+        [
+          {
+            "name": "calculator",
+            "arguments": {
+              "expression": "999 ** 10000"
+            }
+          }
+        ],
+        [
+          {
+            "name": "calculator",
+            "arguments": {
+              "expression": "999 ** 2"
+            }
+          }
+        ]
+      ],
+      "final": "998001"
+    },
+    {
+      "id": "SB029",
+      "task": "读取不存在的 inventory.txt；如果失败，请说明库存文件缺失。",
+      "expected": "inventory.txt 不存在，库存文件缺失。",
+      "category": "failure_recovery",
+      "failure_recovery": true,
+      "baseline_direct": true,
+      "baseline_final": "库存文件读取失败。",
+      "tool_rounds": [
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "inventory.txt"
+            }
+          }
+        ]
+      ],
+      "final": "inventory.txt 不存在，库存文件缺失。"
+    },
+    {
+      "id": "SB030",
+      "task": "先读取 absent_config.txt；如果不存在，请改读 config.txt 并报告值。",
+      "expected": "config.txt 的值是 enabled。",
+      "category": "failure_recovery",
+      "failure_recovery": true,
+      "baseline_direct": true,
+      "baseline_final": "配置读取失败。",
+      "tool_rounds": [
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "absent_config.txt"
+            }
+          }
+        ],
+        [
+          {
+            "name": "read_text_file",
+            "arguments": {
+              "path": "config.txt"
+            }
+          }
+        ]
+      ],
+      "final": "config.txt 的值是 enabled。",
+      "setup_files": {
+        "config.txt": "enabled"
+      }
+    }
+  ]
+}

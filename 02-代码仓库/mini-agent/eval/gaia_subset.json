@@ -1,0 +1,20 @@
+{
+  "name": "GAIA validation text-only subset (authorized-access manifest)",
+  "source": {
+    "dataset": "gaia-benchmark/GAIA",
+    "split": "validation",
+    "access": "gated",
+    "download_status": "not_available_without_huggingface_authorization"
+  },
+  "target_size": 30,
+  "selection_criteria": [
+    "只保留 Level 1 或 Level 2 任务，优先降低工具依赖复杂度",
+    "排除 task_type 为 web 或需要真实浏览器交互的任务",
+    "排除必须下载外部文件、解析音视频或多模态输入的任务",
+    "保留 question 与 final answer 可用纯文本校验的任务",
+    "保留需要多步推理、文件读写或搜索的任务，避免单一事实问答",
+    "按 task_type 分层抽样，避免类别分布严重偏斜"
+  ],
+  "tasks": [],
+  "usage_note": "GAIA 是 gated dataset。未获得授权前不得复制或伪造 validation 内容；获得授权后运行 eval/select_gaia.py 生成 tasks 字段。"
+}
